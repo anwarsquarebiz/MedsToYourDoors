@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\Settings\SettingsService;
+use App\Services\Storefront\NavigationService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -17,7 +18,10 @@ class HandleInertiaRequests extends Middleware
      */
     protected $rootView = 'app';
 
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly NavigationService $navigation,
+    ) {}
 
     /**
      * Determines the current asset version.
@@ -59,6 +63,10 @@ class HandleInertiaRequests extends Middleware
                 'phone' => $this->settings->get('store.phone'),
                 'currency' => config('shop.currency.code'),
                 'social' => $this->settings->group('social')->all(),
+            ],
+            'navigation' => fn (): array => [
+                'collections' => $this->navigation->collections(),
+                'pages' => [],
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

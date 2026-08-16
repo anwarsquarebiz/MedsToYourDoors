@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,9 +14,16 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
-    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
     ->in('Feature');
+
+/*
+ | Unit tests boot the application but get no database. Model rules and value
+ | objects read configuration (currency, stock thresholds, cart limits), which
+ | needs the container; nothing here should query.
+ */
+pest()->extend(TestCase::class)->in('Unit');
 
 /*
 |--------------------------------------------------------------------------

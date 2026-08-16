@@ -1,7 +1,8 @@
+import { ProductCard } from '@/components/storefront/product-card';
 import StorefrontLayout from '@/layouts/storefront-layout';
-import { type SharedData } from '@/types';
+import { type CollectionSummary, type ProductSummary, type SeoMeta, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ShieldCheck, Truck, Undo2 } from 'lucide-react';
+import { ImageOff, ShieldCheck, Truck, Undo2 } from 'lucide-react';
 
 const guarantees = [
     { icon: Truck, title: 'Fast delivery', description: 'Dispatched within one business day.' },
@@ -9,12 +10,18 @@ const guarantees = [
     { icon: Undo2, title: 'Easy returns', description: '30 day return window on eligible items.' },
 ];
 
-export default function Home() {
+interface HomeProps {
+    newArrivals: { data: ProductSummary[] };
+    collections: { data: CollectionSummary[] };
+    seo: SeoMeta;
+}
+
+export default function Home({ newArrivals, collections, seo }: HomeProps) {
     const { store } = usePage<SharedData>().props;
 
     return (
         <StorefrontLayout>
-            <Head title={`${store.name} · Health essentials delivered`} />
+            <Head title={seo.title}>{seo.description && <meta name="description" content={seo.description} />}</Head>
 
             <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
                 <div className="max-w-2xl space-y-6">
@@ -26,19 +33,64 @@ export default function Home() {
                     <div className="flex flex-wrap gap-3">
                         <Link
                             href="/products"
+                            prefetch
                             className="rounded-lg bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
                         >
                             Shop all products
                         </Link>
                         <Link
-                            href="/pages/about-us"
+                            href="/collections"
+                            prefetch
                             className="rounded-lg border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
                         >
-                            About us
+                            Browse collections
                         </Link>
                     </div>
                 </div>
             </section>
+
+            {collections.data.length > 0 && (
+                <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
+                    <h2 className="mb-6 text-2xl font-semibold tracking-tight">Shop by collection</h2>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+                        {collections.data.map((collection) => (
+                            <Link key={collection.id} href={collection.url} prefetch className="group space-y-2">
+                                <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-800">
+                                    {collection.image_url ? (
+                                        <img
+                                            src={collection.image_url}
+                                            alt={collection.title}
+                                            loading="lazy"
+                                            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                    ) : (
+                                        <div className="flex size-full items-center justify-center text-neutral-400">
+                                            <ImageOff className="size-6" />
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="text-sm font-medium group-hover:underline">{collection.title}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {newArrivals.data.length > 0 && (
+                <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
+                    <div className="mb-6 flex items-baseline justify-between">
+                        <h2 className="text-2xl font-semibold tracking-tight">New arrivals</h2>
+                        <Link href="/products" prefetch className="text-sm font-medium underline-offset-4 hover:underline">
+                            View all
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                        {newArrivals.data.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                </section>
+            )}
 
             <section className="border-t border-neutral-200 dark:border-neutral-800">
                 <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\ProductRepository;
 use App\Services\Settings\SettingsService;
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +18,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SettingsService::class);
+
+        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
     }
 
     /**
