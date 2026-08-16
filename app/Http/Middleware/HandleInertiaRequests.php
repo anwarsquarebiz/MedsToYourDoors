@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Inspiring;
+use App\Services\Settings\SettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -16,6 +16,8 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function __construct(private readonly SettingsService $settings) {}
 
     /**
      * Determines the current asset version.
@@ -36,15 +38,33 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $user = $request->user();
 
-        return array_merge(parent::share($request), [
+        return [
             ...parent::share($request),
             'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user === null ? null : [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role->value,
+                    'is_admin' => $user->isAdmin(),
+                    'email_verified_at' => $user->email_verified_at,
+                ],
             ],
-        ]);
+            'store' => fn (): array => [
+                'name' => $this->settings->get('store.name'),
+                'email' => $this->settings->get('store.email'),
+                'phone' => $this->settings->get('store.phone'),
+                'currency' => config('shop.currency.code'),
+                'social' => $this->settings->group('social')->all(),
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+            ],
+        ];
     }
 }

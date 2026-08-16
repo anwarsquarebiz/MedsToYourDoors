@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->alias([
+            'admin' => EnsureUserIsAdmin::class,
+        ]);
+
+        /*
+         | The payment gateway posts webhooks server to server and cannot carry
+         | a session CSRF token.
+         */
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/payments/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
