@@ -60,7 +60,11 @@ export interface StorefrontNavigation {
 export interface CartSummary {
     item_count: number;
     subtotal: Money;
+    discount: Money;
+    total: Money;
+    coupon_code: string | null;
 }
+
 
 export interface SharedData {
     name: string;
@@ -97,16 +101,28 @@ export interface Money {
     decimal: string;
 }
 
-/** Laravel's length-aware paginator, as returned to Inertia. */
+/**
+ * A JsonResource collection wrapping a length-aware paginator.
+ * Laravel serialises this as `{ data, links: { first, last, prev, next }, meta }`.
+ */
 export interface Paginated<T> {
     data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    from: number | null;
-    to: number | null;
-    total: number;
-    links: PaginationLink[];
+    links: {
+        first: string | null;
+        last: string | null;
+        prev: string | null;
+        next: string | null;
+    };
+    meta: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        from: number | null;
+        to: number | null;
+        total: number;
+        path: string;
+        links: PaginationLink[];
+    };
 }
 
 export interface PaginationLink {
@@ -128,6 +144,22 @@ export interface IdOption {
 export interface SeoMeta {
     title: string;
     description?: string | null;
+}
+
+export interface HomeBanner {
+    id: number;
+    title: string;
+    subtitle: string | null;
+    button_label: string | null;
+    button_url: string | null;
+    image_url: string | null;
+    alt: string | null;
+    position: number;
+    status: PublishStatus;
+    published_at: string | null;
+    starts_at: string | null;
+    ends_at: string | null;
+    is_published: boolean;
 }
 
 /* Catalog ---------------------------------------------------------------- */
@@ -263,4 +295,239 @@ export interface CatalogFilters {
     in_stock?: boolean | null;
     min_price?: string | null;
     max_price?: string | null;
+}
+
+/* Cart and coupons ------------------------------------------------------- */
+
+export interface CartLine {
+    id: number;
+    quantity: number;
+    unit_price: Money;
+    line_total: Money;
+    /** Upper bound for the quantity stepper, derived from stock. */
+    max_quantity: number;
+    in_stock: boolean;
+    variant: {
+        id: number;
+        title: string;
+        sku: string | null;
+        options: string[];
+    };
+    product: {
+        id: number;
+        title: string;
+        slug: string;
+        url: string;
+    };
+    image: { url: string; alt: string } | null;
+}
+
+export interface CartTotals {
+    subtotal: Money;
+    discount: Money;
+    total: Money;
+    item_count: number;
+    coupon_code: string | null;
+}
+
+export interface AppliedCoupon {
+    code: string;
+    description: string | null;
+    value: string;
+    /** False when the code is on the cart but no longer eligible. */
+    applied: boolean;
+}
+
+export interface CartDetail {
+    id: number;
+    currency: string;
+    items: CartLine[];
+    totals: CartTotals;
+    coupon: AppliedCoupon | null;
+}
+
+export interface AdminCoupon {
+    id: number;
+    code: string;
+    description: string | null;
+    type: string;
+    type_label: string;
+    value: number;
+    /** Percent for percentage codes, decimal currency for fixed ones. */
+    value_input: string;
+    display_value: string;
+    minimum_subtotal: Money | null;
+    minimum_subtotal_input: string | null;
+    usage_limit: number | null;
+    usage_limit_per_customer: number | null;
+    used_count: number;
+    starts_at: string | null;
+    expires_at: string | null;
+    is_active: boolean;
+    redeemable: boolean;
+    status_label: string;
+}
+
+export interface CouponFilters {
+    search?: string | null;
+    status?: string | null;
+}
+
+export interface AddressRecord {
+    id: number;
+    type: 'shipping' | 'billing';
+    first_name: string;
+    last_name: string;
+    company: string | null;
+    address_line1: string;
+    address_line2: string | null;
+    city: string;
+    province: string | null;
+    postal_code: string;
+    country_code: string;
+    phone: string | null;
+    is_default: boolean;
+    one_line: string;
+}
+
+export interface OrderItemRow {
+    id: number;
+    product_title: string;
+    variant_title: string | null;
+    sku: string | null;
+    quantity: number;
+    unit_price: Money;
+    subtotal: Money;
+    discount: Money;
+    total: Money;
+}
+
+export interface OrderTimelineEvent {
+    id: number;
+    from_status: string | null;
+    to_status: string;
+    note: string | null;
+    actor: string | null;
+    created_at: string | null;
+}
+
+export interface PaymentRow {
+    id: number;
+    gateway: string;
+    gateway_reference: string | null;
+    status: string;
+    status_label: string;
+    amount: Money;
+    failure_reason: string | null;
+    paid_at: string | null;
+}
+
+export interface RefundRow {
+    id: number;
+    amount: Money;
+    reason: string | null;
+    status: string;
+    status_label: string;
+    restock: boolean;
+    processed_at: string | null;
+}
+
+export interface OrderDetail {
+    id: number;
+    order_number: string;
+    email: string;
+    phone: string | null;
+    status: string;
+    status_label: string;
+    status_tone: string;
+    currency: string;
+    subtotal: Money;
+    discount: Money;
+    shipping: Money;
+    tax: Money;
+    grand_total: Money;
+    refunded: Money;
+    refundable: Money;
+    coupon_code: string | null;
+    shipping_address: Record<string, string | null> | null;
+    billing_address: Record<string, string | null> | null;
+    shipping_method_name: string | null;
+    customer_note: string | null;
+    staff_note: string | null;
+    placed_at: string | null;
+    created_at: string | null;
+    items?: OrderItemRow[];
+    timeline?: OrderTimelineEvent[];
+    payments?: PaymentRow[];
+    refunds?: RefundRow[];
+    customer?: { id: number; name: string; email: string } | null;
+    items_count?: number;
+    allowed_transitions: { value: string; label: string }[];
+    is_refundable: boolean;
+}
+
+export interface CmsPage {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    content: string | null;
+    status: PublishStatus;
+    seo_title: string | null;
+    seo_description: string | null;
+    meta_title: string;
+    meta_description: string | null;
+    published_at: string | null;
+    is_published: boolean;
+    url: string;
+}
+
+export interface BlogRecord {
+    id: number;
+    title: string;
+    slug: string;
+    description: string | null;
+    seo_title: string | null;
+    seo_description: string | null;
+    meta_title: string;
+    meta_description: string | null;
+    url: string;
+    posts_count?: number;
+}
+
+export interface BlogPostRecord {
+    id: number;
+    blog_id: number;
+    blog_category_id: number | null;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    content: string | null;
+    status: PublishStatus;
+    seo_title: string | null;
+    seo_description: string | null;
+    meta_title: string;
+    meta_description: string | null;
+    published_at: string | null;
+    is_published: boolean;
+    featured_image_url: string | null;
+    url: string | null;
+    category?: { id: number; name: string; slug: string } | null;
+    author?: { id: number; name: string } | null;
+}
+
+export interface ShippingQuote {
+    id: number;
+    name: string;
+    description: string | null;
+    amount: Money;
+}
+
+export interface DashboardMetrics {
+    orders: number;
+    open_orders: number;
+    customers: number;
+    products: number;
+    revenue: Money;
+    today_revenue: Money;
 }

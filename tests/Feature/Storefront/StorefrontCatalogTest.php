@@ -1,13 +1,42 @@
 <?php
 
+use App\Models\Banner;
 use App\Models\Collection;
 use App\Models\Product;
+use App\Models\ProductOption;
 use App\Models\ProductVariant;
 
 it('renders the home page', function () {
     $this->get('/')
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('storefront/home'));
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/home')
+            ->has('banners.data')
+        );
+});
+
+it('shows live banners on the home page and hides drafts', function () {
+    Banner::factory()->create(['title' => 'Visible slide', 'position' => 1]);
+    Banner::factory()->draft()->create(['title' => 'Hidden slide']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/home')
+            ->has('banners.data', 1)
+            ->where('banners.data.0.title', 'Visible slide')
+        );
+});
+
+it('hides banners that are outside their schedule', function () {
+    Banner::factory()->create([
+        'title' => 'Future promo',
+        'starts_at' => now()->addDay(),
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->has('banners.data', 0));
 });
 
 it('lists published products', function () {
@@ -19,6 +48,8 @@ it('lists published products', function () {
         ->assertInertia(fn ($page) => $page
             ->component('storefront/products/index')
             ->has('products.data', 1)
+            ->has('products.meta.links')
+            ->where('products.meta.total', 1)
             ->where('products.data.0.title', 'Visible Product')
         );
 });
@@ -43,6 +74,59 @@ it('shows a published product', function () {
             ->component('storefront/products/show')
             ->where('product.data.slug', 'vitamin-c')
             ->where('product.data.variants.0.price.formatted', '$12.50')
+        );
+});
+
+it('includes option values so the product page can show variant pickers', function () {
+    $product = Product::factory()->create(['slug' => 'ibuprofen']);
+    ProductOption::factory()->named('Strength', 1, ['200mg', '400mg'])->for($product)->create();
+
+    ProductVariant::factory()->for($product)->priced(500)->create([
+        'title' => '200mg',
+        'option1' => '200mg',
+        'position' => 1,
+    ]);
+    ProductVariant::factory()->for($product)->priced(800)->create([
+        'title' => '400mg',
+        'option1' => '400mg',
+        'position' => 2,
+    ]);
+
+    $this->get('/products/ibuprofen')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/products/show')
+            ->has('product.data.options', 1)
+            ->where('product.data.options.0.name', 'Strength')
+            ->where('product.data.options.0.values', ['200mg', '400mg'])
+            ->has('product.data.variants', 2)
+            ->where('product.data.variants.0.option1', '200mg')
+            ->where('product.data.variants.1.option1', '400mg')
+            ->where('product.data.variants.0.display_title', '200mg')
+            ->where('product.data.variants.1.display_title', '400mg')
+        );
+});
+
+it('includes every variant when a product has no options', function () {
+    $product = Product::factory()->create(['slug' => 'omega-3']);
+
+    ProductVariant::factory()->for($product)->priced(1299)->create([
+        'title' => '60 capsules',
+        'position' => 1,
+    ]);
+    ProductVariant::factory()->for($product)->priced(2199)->create([
+        'title' => '120 capsules',
+        'position' => 2,
+    ]);
+
+    $this->get('/products/omega-3')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/products/show')
+            ->has('product.data.options', 0)
+            ->has('product.data.variants', 2)
+            ->where('product.data.variants.0.display_title', '60 capsules')
+            ->where('product.data.variants.1.display_title', '120 capsules')
         );
 });
 

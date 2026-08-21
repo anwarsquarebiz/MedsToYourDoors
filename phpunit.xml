@@ -30,6 +30,8 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="SHOP_CACHE_ENABLED" value="false"/>
         <env name="PAYMENT_GATEWAY" value="fake"/>
+        <env name="PAYMENT_WEBHOOK_API_KEY" value="testing-webhook-key"/>
+        <env name="PAYMENT_GATEWAY_API_KEY" value="testing-api-key"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

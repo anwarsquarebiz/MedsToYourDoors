@@ -1,7 +1,16 @@
 <?php
 
+use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Account\AddressController;
+use App\Http\Controllers\Account\OrderController as AccountOrderController;
+use App\Http\Controllers\Storefront\BlogController;
+use App\Http\Controllers\Storefront\CartController;
+use App\Http\Controllers\Storefront\CartCouponController;
+use App\Http\Controllers\Storefront\CartItemController;
+use App\Http\Controllers\Storefront\CheckoutController;
 use App\Http\Controllers\Storefront\CollectionController;
 use App\Http\Controllers\Storefront\HomeController;
+use App\Http\Controllers\Storefront\PageController;
 use App\Http\Controllers\Storefront\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,3 +32,33 @@ Route::get('products/{slug}', [ProductController::class, 'show'])->name('product
 
 Route::get('collections', [CollectionController::class, 'index'])->name('collections.index');
 Route::get('collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
+
+Route::get('pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+
+Route::get('blogs/{blogSlug}', [BlogController::class, 'show'])->name('blogs.show');
+Route::get('blogs/{blogSlug}/{postSlug}', [BlogController::class, 'post'])->name('blogs.posts.show');
+
+Route::get('cart', [CartController::class, 'show'])->name('cart.show');
+Route::post('cart/items', [CartItemController::class, 'store'])->name('cart.items.store');
+Route::patch('cart/items/{item}', [CartItemController::class, 'update'])->name('cart.items.update');
+Route::delete('cart/items/{item}', [CartItemController::class, 'destroy'])->name('cart.items.destroy');
+Route::post('cart/coupon', [CartCouponController::class, 'store'])->name('cart.coupon.store');
+Route::delete('cart/coupon', [CartCouponController::class, 'destroy'])->name('cart.coupon.destroy');
+
+Route::get('checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('checkout/{order}/complete', [CheckoutController::class, 'complete'])->name('checkout.complete');
+Route::get('checkout/{order}/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+
+Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
+    Route::get('/', [AccountController::class, 'show'])->name('show');
+    Route::patch('/', [AccountController::class, 'update'])->name('update');
+
+    Route::get('orders', [AccountOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
+
+    Route::get('addresses', [AddressController::class, 'index'])->name('addresses.index');
+    Route::post('addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::delete('addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+});

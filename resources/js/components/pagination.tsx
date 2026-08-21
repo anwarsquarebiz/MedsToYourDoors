@@ -1,16 +1,18 @@
-import { type PaginationLink } from '@/types';
+import { type Paginated } from '@/types';
 import { Link } from '@inertiajs/react';
 
 interface PaginationProps {
-    links: PaginationLink[];
-    from: number | null;
-    to: number | null;
-    total: number;
+    paginator: Pick<Paginated<unknown>, 'meta'>;
 }
 
-export function Pagination({ links, from, to, total }: PaginationProps) {
+export function Pagination({ paginator }: PaginationProps) {
+    const links = paginator.meta?.links ?? [];
+    const from = paginator.meta?.from ?? null;
+    const to = paginator.meta?.to ?? null;
+    const total = paginator.meta?.total ?? 0;
+
     /** Laravel emits Previous/Next plus a page for each number; hide when there is one page. */
-    if (links.length <= 3) {
+    if (!Array.isArray(links) || links.length <= 3) {
         return null;
     }
 

@@ -90,7 +90,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
             </header>
 
             <main className="flex-1">
-                <div className="mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6">
+                <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
                     <FlashMessages />
                 </div>
                 {children}

@@ -1,6 +1,7 @@
+import { HomeBannerSlider } from '@/components/storefront/home-banner-slider';
 import { ProductCard } from '@/components/storefront/product-card';
 import StorefrontLayout from '@/layouts/storefront-layout';
-import { type CollectionSummary, type ProductSummary, type SeoMeta, type SharedData } from '@/types';
+import { type CollectionSummary, type HomeBanner, type ProductSummary, type SeoMeta, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ImageOff, ShieldCheck, Truck, Undo2 } from 'lucide-react';
 
@@ -11,46 +12,52 @@ const guarantees = [
 ];
 
 interface HomeProps {
+    banners: { data: HomeBanner[] };
     newArrivals: { data: ProductSummary[] };
     collections: { data: CollectionSummary[] };
     seo: SeoMeta;
 }
 
-export default function Home({ newArrivals, collections, seo }: HomeProps) {
+export default function Home({ banners, newArrivals, collections, seo }: HomeProps) {
     const { store } = usePage<SharedData>().props;
+    const slides = banners.data.filter((banner) => Boolean(banner.image_url));
 
     return (
         <StorefrontLayout>
             <Head title={seo.title}>{seo.description && <meta name="description" content={seo.description} />}</Head>
 
-            <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
-                <div className="max-w-2xl space-y-6">
-                    <p className="text-sm font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">{store.name}</p>
-                    <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Health essentials, delivered to your door.</h1>
-                    <p className="text-lg text-neutral-600 dark:text-neutral-300">
-                        Browse trusted medication and everyday care products, with transparent pricing and reliable delivery.
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                        <Link
-                            href="/products"
-                            prefetch
-                            className="rounded-lg bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-                        >
-                            Shop all products
-                        </Link>
-                        <Link
-                            href="/collections"
-                            prefetch
-                            className="rounded-lg border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-                        >
-                            Browse collections
-                        </Link>
+            {slides.length > 0 ? (
+                <HomeBannerSlider banners={slides} />
+            ) : (
+                <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+                    <div className="max-w-2xl space-y-6">
+                        <p className="text-sm font-medium tracking-wide text-neutral-500 uppercase dark:text-neutral-400">{store.name}</p>
+                        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Health essentials, delivered to your door.</h1>
+                        <p className="text-lg text-neutral-600 dark:text-neutral-300">
+                            Browse trusted medication and everyday care products, with transparent pricing and reliable delivery.
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                            <Link
+                                href="/products"
+                                prefetch
+                                className="rounded-lg bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                            >
+                                Shop all products
+                            </Link>
+                            <Link
+                                href="/collections"
+                                prefetch
+                                className="rounded-lg border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                            >
+                                Browse collections
+                            </Link>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {collections.data.length > 0 && (
-                <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
+                <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 mt-10">
                     <h2 className="mb-6 text-2xl font-semibold tracking-tight">Shop by collection</h2>
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                         {collections.data.map((collection) => (

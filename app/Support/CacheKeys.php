@@ -27,6 +27,8 @@ final class CacheKeys
 
     public const ShippingMethods = 'shipping_methods';
 
+    public const Banners = 'banners';
+
     /**
      * All invalidatable domains, used by the cache:clear tooling and tests.
      *
@@ -41,6 +43,7 @@ final class CacheKeys
             self::Blogs,
             self::Settings,
             self::ShippingMethods,
+            self::Banners,
         ];
     }
 

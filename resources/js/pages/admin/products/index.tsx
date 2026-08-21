@@ -177,7 +177,7 @@ export default function AdminProductsIndex({ products, filters, statuses, collec
                 </div>
             )}
 
-            <Pagination links={products.links} from={products.from} to={products.to} total={products.total} />
+            <Pagination paginator={products} />
         </AdminLayout>
     );
 }

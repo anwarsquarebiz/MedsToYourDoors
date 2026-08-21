@@ -3,6 +3,7 @@
 namespace App\Services\Storefront;
 
 use App\Models\Collection;
+use App\Models\Page;
 use App\Support\CacheKeys;
 
 /**
@@ -31,6 +32,27 @@ class NavigationService
                 ->map(fn (Collection $collection): array => [
                     'title' => $collection->title,
                     'url' => route('collections.show', $collection->slug),
+                ])
+                ->all();
+        });
+    }
+
+    /**
+     * Published CMS pages, for the footer.
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function pages(): array
+    {
+        /** @var array<int, array{title: string, url: string}> */
+        return CacheKeys::remember(CacheKeys::Pages, 'navigation', function (): array {
+            return Page::query()
+                ->published()
+                ->orderBy('title')
+                ->get(['title', 'slug'])
+                ->map(fn (Page $page): array => [
+                    'title' => $page->title,
+                    'url' => route('pages.show', $page->slug),
                 ])
                 ->all();
         });

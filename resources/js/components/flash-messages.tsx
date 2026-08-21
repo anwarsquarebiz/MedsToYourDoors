@@ -41,7 +41,7 @@ export function FlashMessages() {
     }
 
     return (
-        <div className="flex flex-col gap-2" role="status" aria-live="polite">
+        <div className="flex flex-col gap-2 pt-4" role="status" aria-live="polite">
             {messages.map(({ tone, message }) => {
                 const { container, icon: Icon } = toneStyles[tone];
 

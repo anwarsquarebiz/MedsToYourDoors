@@ -23,7 +23,7 @@ export default function ProductsIndex({ products, filters, seo }: ProductsIndexP
                     <p className="text-neutral-600 dark:text-neutral-400">Everything currently available in our store.</p>
                 </header>
 
-                <CatalogToolbar filters={filters} baseUrl="/products" resultCount={products.total} />
+                <CatalogToolbar filters={filters} baseUrl="/products" resultCount={products.meta.total} />
 
                 {products.data.length === 0 ? (
                     <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -40,7 +40,7 @@ export default function ProductsIndex({ products, filters, seo }: ProductsIndexP
                         </div>
 
                         <div className="mt-10">
-                            <Pagination links={products.links} from={products.from} to={products.to} total={products.total} />
+                            <Pagination paginator={products} />
                         </div>
                     </>
                 )}

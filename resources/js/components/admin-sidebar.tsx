@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookText, FileText, LayoutGrid, Package, Settings, ShoppingCart, Store, Tags, Ticket, Users } from 'lucide-react';
+import { BookText, FileText, Images, LayoutGrid, Package, Settings, ShoppingCart, Store, Tags, Ticket, Users } from 'lucide-react';
 
 const navGroups: NavGroup[] = [
     {
@@ -38,6 +38,7 @@ const navGroups: NavGroup[] = [
         title: 'Content',
         items: [
             { title: 'Pages', url: '/admin/pages', icon: FileText },
+            { title: 'Banners', url: '/admin/banners', icon: Images },
             { title: 'Blogs', url: '/admin/blogs', icon: BookText },
         ],
     },

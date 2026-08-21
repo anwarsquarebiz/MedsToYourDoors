@@ -30,8 +30,9 @@ return [
             'api_key' => env('PAYMENT_GATEWAY_API_KEY'),
 
             /*
-             | Paths appended to base_url. Adjust these to match the remote
-             | gateway's documented routes without touching the driver.
+             | Paths appended to base_url. Leave create_payment empty to POST
+             | at base_url itself (for example when BASE_URL already includes
+             | /api/orders). Fetch and refund paths are still required.
              */
             'endpoints' => [
                 'create_payment' => env('PAYMENT_GATEWAY_CREATE_PATH', '/payments'),

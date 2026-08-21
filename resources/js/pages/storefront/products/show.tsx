@@ -1,49 +1,126 @@
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/storefront-layout';
-import { type ProductDetail, type ProductVariant, type SeoMeta } from '@/types';
+import { type ProductDetail, type ProductOption, type ProductVariant, type SeoMeta } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Check, ImageOff, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { type FormEventHandler, useMemo, useState } from 'react';
+import { type FormEventHandler, useEffect, useMemo, useState } from 'react';
 
 interface ProductShowProps {
     product: { data: ProductDetail };
     seo: SeoMeta;
 }
 
+/** Nested JsonResource collections may arrive as `{ data: T[] }` under Inertia. */
+function unwrapList<T>(value: T[] | { data: T[] } | undefined | null): T[] {
+    if (Array.isArray(value)) {
+        return value;
+    }
+
+    if (value && Array.isArray(value.data)) {
+        return value.data;
+    }
+
+    return [];
+}
+
 /** The option value a variant holds at the given 1-based option position. */
 const optionValueAt = (variant: ProductVariant, position: number): string | null =>
     position === 1 ? variant.option1 : position === 2 ? variant.option2 : variant.option3;
 
-export default function ProductShow({ product, seo }: ProductShowProps) {
-    const { data: item } = product;
+function listedOptionValues(values: ProductOption['values'] | string | null | undefined): string[] {
+    if (Array.isArray(values)) {
+        return values.filter((value) => value.trim() !== '');
+    }
 
-    const [selected, setSelected] = useState<Record<number, string>>(() => {
-        const first = item.variants[0];
-        if (!first) {
-            return {};
+    if (typeof values === 'string' && values.trim() !== '') {
+        return values
+            .split(',')
+            .map((value) => value.trim())
+            .filter((value) => value !== '');
+    }
+
+    return [];
+}
+
+function uniqueVariantValues(variants: ProductVariant[], position: number): string[] {
+    const seen = new Set<string>();
+
+    for (const variant of variants) {
+        const value = optionValueAt(variant, position);
+
+        if (value) {
+            seen.add(value);
+        }
+    }
+
+    return [...seen];
+}
+
+/**
+ * Options the customer can pick from. Missing option values are filled in from
+ * the variants so a product still shows choices when values were not stored.
+ */
+function optionsForPicker(options: ProductOption[], variants: ProductVariant[]): ProductOption[] {
+    return options
+        .map((option) => {
+            const listed = listedOptionValues(option.values);
+
+            return {
+                ...option,
+                values: listed.length > 0 ? listed : uniqueVariantValues(variants, option.position),
+            };
+        })
+        .filter((option) => option.values.length > 0);
+}
+
+function initialSelection(options: ProductOption[], variant: ProductVariant | undefined): Record<number, string> {
+    if (!variant) {
+        return {};
+    }
+
+    return options.reduce<Record<number, string>>((carry, option) => {
+        const value = optionValueAt(variant, option.position);
+
+        if (value) {
+            carry[option.position] = value;
+        } else if (option.values[0]) {
+            carry[option.position] = option.values[0];
         }
 
-        return item.options.reduce<Record<number, string>>((carry, option) => {
-            const value = optionValueAt(first, option.position);
-            if (value) {
-                carry[option.position] = value;
-            }
-            return carry;
-        }, {});
-    });
+        return carry;
+    }, {});
+}
+
+function pickerButtonClass(isSelected: boolean, unavailable = false): string {
+    return `rounded-lg border px-4 py-2 text-sm transition-colors ${
+        isSelected
+            ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
+            : 'border-neutral-300 hover:border-neutral-500 dark:border-neutral-700'
+    } ${unavailable ? 'opacity-50' : ''}`;
+}
+
+export default function ProductShow({ product, seo }: ProductShowProps) {
+    const { data: item } = product;
+    const variants = unwrapList(item.variants);
+    const pickers = optionsForPicker(unwrapList(item.options), variants);
+    const showVariantList = pickers.length === 0 && variants.length > 1;
+
+    const [selected, setSelected] = useState<Record<number, string>>(() => initialSelection(pickers, variants[0]));
+    const [selectedVariantId, setSelectedVariantId] = useState<number | undefined>(variants[0]?.id);
 
     /** The variant matching every selected option, falling back to the first. */
     const activeVariant = useMemo<ProductVariant | undefined>(() => {
-        if (item.options.length === 0) {
-            return item.variants[0];
+        if (pickers.length > 0) {
+            return (
+                variants.find((variant) =>
+                    pickers.every((option) => optionValueAt(variant, option.position) === selected[option.position]),
+                ) ?? variants[0]
+            );
         }
 
-        return (
-            item.variants.find((variant) =>
-                item.options.every((option) => optionValueAt(variant, option.position) === selected[option.position]),
-            ) ?? item.variants[0]
-        );
-    }, [item.options, item.variants, selected]);
+        return variants.find((variant) => variant.id === selectedVariantId) ?? variants[0];
+    }, [pickers, variants, selected, selectedVariantId]);
 
     const [activeImage, setActiveImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
@@ -66,6 +143,10 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
 
     const maxQuantity = Math.max(1, activeVariant?.max_quantity ?? 1);
     const images = item.images;
+
+    useEffect(() => {
+        setQuantity((current) => Math.min(current, maxQuantity));
+    }, [maxQuantity]);
 
     return (
         <StorefrontLayout>
@@ -134,7 +215,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
 
                         {item.description && <p className="text-neutral-600 dark:text-neutral-300">{item.description}</p>}
 
-                        {item.options.map((option) => (
+                        {pickers.map((option) => (
                             <fieldset key={option.id} className="space-y-2">
                                 <legend className="text-sm font-medium">{option.name}</legend>
                                 <div className="flex flex-wrap gap-2">
@@ -145,12 +226,9 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                             <button
                                                 key={value}
                                                 type="button"
+                                                aria-pressed={isSelected}
                                                 onClick={() => setSelected((current) => ({ ...current, [option.position]: value }))}
-                                                className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
-                                                    isSelected
-                                                        ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                                                        : 'border-neutral-300 hover:border-neutral-500 dark:border-neutral-700'
-                                                }`}
+                                                className={pickerButtonClass(isSelected)}
                                             >
                                                 {value}
                                             </button>
@@ -159,6 +237,30 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                 </div>
                             </fieldset>
                         ))}
+
+                        {showVariantList && (
+                            <fieldset className="space-y-2">
+                                <legend className="text-sm font-medium">Variant</legend>
+                                <div className="flex flex-wrap gap-2">
+                                    {variants.map((variant) => {
+                                        const isSelected = activeVariant?.id === variant.id;
+
+                                        return (
+                                            <button
+                                                key={variant.id}
+                                                type="button"
+                                                aria-pressed={isSelected}
+                                                onClick={() => setSelectedVariantId(variant.id)}
+                                                className={pickerButtonClass(isSelected, !variant.in_stock)}
+                                            >
+                                                <span>{variant.display_title}</span>
+                                                <span className="ml-2 text-xs opacity-80">{variant.price.formatted}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </fieldset>
+                        )}
 
                         {activeVariant?.in_stock ? (
                             <p className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400">
@@ -201,6 +303,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                 <ShoppingBag className="mr-2 size-4" />
                                 {activeVariant?.in_stock ? 'Add to cart' : 'Sold out'}
                             </Button>
+                            <InputError message={form.errors.product_variant_id ?? form.errors.quantity} />
                         </form>
 
                         {item.body_html && (

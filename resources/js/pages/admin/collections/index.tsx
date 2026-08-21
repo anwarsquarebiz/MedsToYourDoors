@@ -118,7 +118,7 @@ export default function AdminCollectionsIndex({ collections, filters }: AdminCol
                 </div>
             )}
 
-            <Pagination links={collections.links} from={collections.from} to={collections.to} total={collections.total} />
+            <Pagination paginator={collections} />
         </AdminLayout>
     );
 }

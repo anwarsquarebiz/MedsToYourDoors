@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Storefront;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BannerResource;
 use App\Http\Resources\CollectionSummaryResource;
 use App\Http\Resources\ProductSummaryResource;
+use App\Models\Banner;
 use App\Models\Collection;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Services\Settings\SettingsService;
+use App\Support\CacheKeys;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,6 +24,9 @@ class HomeController extends Controller
     public function __invoke(): Response
     {
         return Inertia::render('storefront/home', [
+            'banners' => BannerResource::collection(
+                CacheKeys::remember(CacheKeys::Banners, 'home', fn () => Banner::query()->live()->get())
+            ),
             'newArrivals' => ProductSummaryResource::collection($this->products->latestPublished(8)),
             'collections' => CollectionSummaryResource::collection(
                 Collection::query()

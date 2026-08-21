@@ -1,0 +1,56 @@
+import { Pagination } from '@/components/pagination';
+import StorefrontLayout from '@/layouts/storefront-layout';
+import { type OrderDetail, type Paginated, type SeoMeta } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+
+interface AccountOrdersProps {
+    orders: Paginated<OrderDetail>;
+    seo: SeoMeta;
+}
+
+export default function AccountOrders({ orders, seo }: AccountOrdersProps) {
+    return (
+        <StorefrontLayout>
+            <Head title={seo.title} />
+
+            <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
+                <h1 className="text-3xl font-semibold tracking-tight">Order history</h1>
+                <nav className="mt-4 flex gap-4 text-sm">
+                    <Link href="/account" className="text-neutral-600 hover:underline dark:text-neutral-400">
+                        Profile
+                    </Link>
+                    <Link href="/account/orders" className="font-medium">
+                        Orders
+                    </Link>
+                    <Link href="/account/addresses" className="text-neutral-600 hover:underline dark:text-neutral-400">
+                        Addresses
+                    </Link>
+                </nav>
+
+                {orders.data.length === 0 ? (
+                    <p className="text-muted-foreground mt-8 text-sm">You have not placed any orders yet.</p>
+                ) : (
+                    <ul className="mt-8 divide-y divide-neutral-200 dark:divide-neutral-800">
+                        {orders.data.map((order) => (
+                            <li key={order.id} className="flex items-center justify-between py-4">
+                                <div>
+                                    <Link href={`/account/orders/${order.id}`} className="font-medium hover:underline">
+                                        {order.order_number}
+                                    </Link>
+                                    <p className="text-muted-foreground text-sm">
+                                        {order.status_label} · {order.grand_total.formatted}
+                                    </p>
+                                </div>
+                                <Link href={`/account/orders/${order.id}`} className="text-sm underline">
+                                    View
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
+                <Pagination paginator={orders} />
+            </div>
+        </StorefrontLayout>
+    );
+}

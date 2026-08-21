@@ -35,7 +35,7 @@ export default function CollectionShow({ collection, description, products, filt
                     {description && <p className="max-w-2xl text-neutral-600 dark:text-neutral-400">{description}</p>}
                 </header>
 
-                <CatalogToolbar filters={filters} baseUrl={current.url} resultCount={products.total} />
+                <CatalogToolbar filters={filters} baseUrl={current.url} resultCount={products.meta.total} />
 
                 {products.data.length === 0 ? (
                     <div className="flex flex-col items-center gap-3 py-20 text-center">
@@ -52,7 +52,7 @@ export default function CollectionShow({ collection, description, products, filt
                         </div>
 
                         <div className="mt-10">
-                            <Pagination links={products.links} from={products.from} to={products.to} total={products.total} />
+                            <Pagination paginator={products} />
                         </div>
                     </>
                 )}

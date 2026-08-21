@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Cart\CartResolver;
+use App\Services\Cart\CartService;
 use App\Services\Settings\SettingsService;
 use App\Services\Storefront\NavigationService;
+use App\Support\CartTotals;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -21,6 +24,8 @@ class HandleInertiaRequests extends Middleware
     public function __construct(
         private readonly SettingsService $settings,
         private readonly NavigationService $navigation,
+        private readonly CartResolver $cartResolver,
+        private readonly CartService $carts,
     ) {}
 
     /**
@@ -66,13 +71,38 @@ class HandleInertiaRequests extends Middleware
             ],
             'navigation' => fn (): array => [
                 'collections' => $this->navigation->collections(),
-                'pages' => [],
+                'pages' => $this->navigation->pages(),
             ],
+
+            /*
+             | A lazy closure so the header badge never costs a query on requests
+             | that do not render it, and never creates a cart just by browsing.
+             */
+            'cart' => fn (): array => $this->cartSummary(),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
                 'warning' => $request->session()->get('warning'),
             ],
+        ];
+    }
+
+    /**
+     * The header badge: item count and payable total, nothing more.
+     *
+     * @return array<string, mixed>
+     */
+    private function cartSummary(): array
+    {
+        $cart = $this->cartResolver->current();
+        $totals = $cart === null ? CartTotals::empty() : $this->carts->totals($cart);
+
+        return [
+            'item_count' => $totals->itemCount,
+            'subtotal' => $totals->subtotal->toArray(),
+            'discount' => $totals->discount->toArray(),
+            'total' => $totals->total()->toArray(),
+            'coupon_code' => $totals->couponCode,
         ];
     }
 }

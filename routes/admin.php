@@ -1,9 +1,16 @@
 <?php
 
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CollectionController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
+use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,4 +35,33 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::put('products/{product}/images/order', [ProductImageController::class, 'reorder'])->name('products.images.reorder');
 
         Route::resource('collections', CollectionController::class)->except('show');
+
+        Route::resource('coupons', CouponController::class)->except('show');
+
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        Route::post('orders/{order}/refunds', [OrderController::class, 'refund'])->name('orders.refunds.store');
+
+        Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+
+        Route::resource('banners', BannerController::class)->except('show');
+
+        Route::resource('pages', PageController::class)->except('show');
+
+        Route::get('blogs', [BlogController::class, 'index'])->name('blogs.index');
+        Route::post('blogs', [BlogController::class, 'store'])->name('blogs.store');
+        Route::get('blogs/{blog}/edit', [BlogController::class, 'edit'])->name('blogs.edit');
+        Route::put('blogs/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+        Route::delete('blogs/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
+        Route::post('blog-posts', [BlogController::class, 'storePost'])->name('blog-posts.store');
+        Route::put('blog-posts/{post}', [BlogController::class, 'updatePost'])->name('blog-posts.update');
+        Route::delete('blog-posts/{post}', [BlogController::class, 'destroyPost'])->name('blog-posts.destroy');
+
+        Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('shipping-methods', [SettingsController::class, 'storeShippingMethod'])->name('shipping-methods.store');
+        Route::put('shipping-methods/{method}', [SettingsController::class, 'updateShippingMethod'])->name('shipping-methods.update');
+        Route::delete('shipping-methods/{method}', [SettingsController::class, 'destroyShippingMethod'])->name('shipping-methods.destroy');
     });

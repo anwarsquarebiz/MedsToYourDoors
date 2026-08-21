@@ -17,7 +17,10 @@ it('allows staff to reach the dashboard', function () {
 
     $this->get('/admin')
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('admin/dashboard'));
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/dashboard')
+            ->has('metrics')
+        );
 });
 
 it('keeps a customer out of every admin section', function (string $path) {
@@ -26,4 +29,13 @@ it('keeps a customer out of every admin section', function (string $path) {
     $this->get($path)->assertForbidden();
 })->with([
     '/admin',
+    '/admin/products',
+    '/admin/collections',
+    '/admin/coupons',
+    '/admin/orders',
+    '/admin/customers',
+    '/admin/banners',
+    '/admin/pages',
+    '/admin/blogs',
+    '/admin/settings',
 ]);
