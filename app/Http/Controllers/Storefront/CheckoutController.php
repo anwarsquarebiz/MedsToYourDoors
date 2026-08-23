@@ -15,8 +15,10 @@ use App\Services\Checkout\CheckoutService;
 use App\Services\Checkout\ShippingCalculator;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class CheckoutController extends Controller
 {
@@ -71,7 +73,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(PlaceOrderRequest $request): RedirectResponse
+    public function store(PlaceOrderRequest $request): RedirectResponse|SymfonyResponse
     {
         $cart = $this->resolver->current();
 
@@ -89,7 +91,29 @@ class CheckoutController extends Controller
         $ids[] = $order->id;
         $request->session()->put('placed_order_ids', $ids);
 
-        return redirect()->to($this->checkout->redirectUrl($order));
+        $redirectUrl = $this->checkout->redirectUrl($order);
+
+        if ($this->isExternalRedirect($request, $redirectUrl)) {
+            return Inertia::location($redirectUrl);
+        }
+
+        return redirect()->to($redirectUrl);
+    }
+
+    private function isExternalRedirect(Request $request, string $url): bool
+    {
+        if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
+            return false;
+        }
+
+        $targetOrigin = parse_url($url, PHP_URL_SCHEME).'://'.parse_url($url, PHP_URL_HOST);
+        $targetPort = parse_url($url, PHP_URL_PORT) ?? (parse_url($url, PHP_URL_SCHEME) === 'https' ? 443 : 80);
+        $appPort = $request->getPort() ?: ($request->getScheme() === 'https' ? 443 : 80);
+
+        $targetAuthority = rtrim($targetOrigin, '/').':'.$targetPort;
+        $appAuthority = rtrim($request->getSchemeAndHttpHost(), '/').':'.$appPort;
+
+        return strcasecmp($targetAuthority, $appAuthority) !== 0;
     }
 
     public function complete(Order $order): Response
