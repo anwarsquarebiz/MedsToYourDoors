@@ -1,15 +1,24 @@
-import { type Paginated } from '@/types';
+import { type Paginated, type PaginationLink } from '@/types';
 import { Link } from '@inertiajs/react';
 
 interface PaginationProps {
-    paginator: Pick<Paginated<unknown>, 'meta'>;
+    paginator: Pick<Paginated<unknown>, 'meta'> & {
+        /** Raw LengthAwarePaginator shape (before JsonResource wrapping). */
+        links?: PaginationLink[] | Paginated<unknown>['links'];
+        from?: number | null;
+        to?: number | null;
+        total?: number;
+    };
 }
 
 export function Pagination({ paginator }: PaginationProps) {
-    const links = paginator.meta?.links ?? [];
-    const from = paginator.meta?.from ?? null;
-    const to = paginator.meta?.to ?? null;
-    const total = paginator.meta?.total ?? 0;
+    const metaLinks = paginator.meta?.links;
+    const rootLinks = Array.isArray(paginator.links) ? paginator.links : [];
+    const links = Array.isArray(metaLinks) && metaLinks.length > 0 ? metaLinks : rootLinks;
+
+    const from = paginator.meta?.from ?? paginator.from ?? null;
+    const to = paginator.meta?.to ?? paginator.to ?? null;
+    const total = paginator.meta?.total ?? paginator.total ?? 0;
 
     /** Laravel emits Previous/Next plus a page for each number; hide when there is one page. */
     if (!Array.isArray(links) || links.length <= 3) {

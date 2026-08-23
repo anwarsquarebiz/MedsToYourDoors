@@ -1,4 +1,5 @@
 import { NavUser } from '@/components/nav-user';
+import { StoreLogo } from '@/components/store-logo';
 import {
     Sidebar,
     SidebarContent,
@@ -12,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookText, FileText, Images, LayoutGrid, Package, Settings, ShoppingCart, Store, Tags, Ticket, Users } from 'lucide-react';
+import { BookText, FileText, Images, LayoutGrid, Package, Settings, ShoppingCart, Store, Tags, Ticket, Truck, Users } from 'lucide-react';
 
 const navGroups: NavGroup[] = [
     {
@@ -44,7 +45,10 @@ const navGroups: NavGroup[] = [
     },
     {
         title: 'Configuration',
-        items: [{ title: 'Settings', url: '/admin/settings', icon: Settings }],
+        items: [
+            { title: 'Settings', url: '/admin/settings', icon: Settings },
+            { title: 'Shipping methods', url: '/admin/shipping-methods', icon: Truck },
+        ],
     },
 ];
 
@@ -64,8 +68,11 @@ export function AdminSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/admin" prefetch>
-                                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                    <Store className="size-4" />
+                                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg">
+                                    <StoreLogo
+                                        imageClassName="h-full w-full object-contain"
+                                        fallbackClassName="size-4 fill-current text-sidebar-primary-foreground"
+                                    />
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-semibold">Store admin</span>

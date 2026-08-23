@@ -1,9 +1,10 @@
 import { FlashMessages } from '@/components/flash-messages';
+import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Package, ShoppingBag, User } from 'lucide-react';
+import { Menu, ShoppingBag, User } from 'lucide-react';
 
 interface StorefrontLayoutProps {
     children: React.ReactNode;
@@ -49,8 +50,11 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </Sheet>
 
                     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                        <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
-                            <Package className="size-4" />
+                        <span className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
+                            <StoreLogo
+                                imageClassName="h-full w-full object-contain"
+                                fallbackClassName="size-4 fill-current text-white dark:text-neutral-900"
+                            />
                         </span>
                         <span className="hidden sm:inline">{store.name}</span>
                     </Link>

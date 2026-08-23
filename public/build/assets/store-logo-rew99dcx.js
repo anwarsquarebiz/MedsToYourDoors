@@ -1,0 +1,1 @@
+import{K as m,j as s}from"./app-7qDp7mhp.js";import{A as n}from"./app-logo-icon-CQhIVJES.js";function i({className:r,imageClassName:t,fallbackClassName:e}){const{store:o}=m().props;return o.logo_url?s.jsx("img",{src:o.logo_url,alt:o.name,className:t??r}):s.jsx(n,{className:e??r})}export{i as S};

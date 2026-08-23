@@ -156,3 +156,57 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    .product-details-body {
+        @apply space-y-4 text-[0.9375rem] leading-relaxed text-neutral-600 dark:text-neutral-300;
+    }
+
+    .product-details-body > :first-child {
+        @apply mt-0;
+    }
+
+    .product-details-body > :last-child {
+        @apply mb-0;
+    }
+
+    .product-details-body h2 {
+        @apply mt-6 border-t border-neutral-200 pt-5 text-base font-semibold text-neutral-900 first:mt-0 first:border-t-0 first:pt-0 dark:border-neutral-800 dark:text-neutral-50;
+    }
+
+    .product-details-body h3 {
+        @apply mt-4 text-sm font-semibold tracking-wide text-neutral-900 uppercase dark:text-neutral-100;
+    }
+
+    .product-details-body p {
+        @apply leading-relaxed;
+    }
+
+    .product-details-body strong {
+        @apply font-semibold text-neutral-900 dark:text-neutral-100;
+    }
+
+    .product-details-body ul {
+        @apply list-disc space-y-2 pl-5;
+    }
+
+    .product-details-body ol {
+        @apply list-decimal space-y-2 pl-5;
+    }
+
+    .product-details-body li {
+        @apply pl-1;
+    }
+
+    .product-details-body li::marker {
+        @apply text-neutral-400 dark:text-neutral-500;
+    }
+
+    .product-details-body hr {
+        @apply hidden;
+    }
+
+    .product-details-body a {
+        @apply font-medium text-neutral-900 underline underline-offset-4 dark:text-neutral-100;
+    }
+}

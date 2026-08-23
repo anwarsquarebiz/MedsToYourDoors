@@ -37,6 +37,8 @@ export interface StoreInfo {
     phone: string;
     currency: string;
     social: Record<string, string>;
+    logo_url: string | null;
+    favicon_url: string | null;
 }
 
 export interface FlashMessages {

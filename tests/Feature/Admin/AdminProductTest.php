@@ -52,6 +52,40 @@ it('lists products for staff', function () {
         ->assertInertia(fn ($page) => $page
             ->component('admin/products/index')
             ->has('products.data', 3)
+            ->has('products.meta')
+            ->has('products.meta.links')
+        );
+});
+
+it('includes image urls and paginates the admin listing', function () {
+    config(['shop.catalog.admin_per_page' => 2]);
+
+    Product::factory()->count(2)->create()->each(
+        fn (Product $row) => ProductVariant::factory()->for($row)->create()
+    );
+
+    $product = Product::factory()->create([
+        'title' => 'With photo',
+        'created_at' => now()->addMinute(),
+    ]);
+    ProductVariant::factory()->for($product)->create();
+    $image = $product->images()->create([
+        'disk' => 'public',
+        'path' => 'products/example.jpg',
+        'alt' => 'With photo',
+        'position' => 1,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get('/admin/products')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('products.data', 2)
+            ->where('products.meta.per_page', 2)
+            ->where('products.meta.total', 3)
+            ->has('products.meta.links')
+            ->where('products.data.0.title', 'With photo')
+            ->where('products.data.0.images.0.url', $image->url())
         );
 });
 

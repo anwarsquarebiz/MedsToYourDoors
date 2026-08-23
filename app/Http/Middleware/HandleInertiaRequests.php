@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
+use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
 use App\Services\Storefront\NavigationService;
 use App\Support\CartTotals;
@@ -23,6 +24,7 @@ class HandleInertiaRequests extends Middleware
 
     public function __construct(
         private readonly SettingsService $settings,
+        private readonly BrandingService $branding,
         private readonly NavigationService $navigation,
         private readonly CartResolver $cartResolver,
         private readonly CartService $carts,
@@ -68,6 +70,8 @@ class HandleInertiaRequests extends Middleware
                 'phone' => $this->settings->get('store.phone'),
                 'currency' => config('shop.currency.code'),
                 'social' => $this->settings->group('social')->all(),
+                'logo_url' => $this->branding->logoUrl(),
+                'favicon_url' => $this->branding->faviconUrl(),
             ],
             'navigation' => fn (): array => [
                 'collections' => $this->navigation->collections(),

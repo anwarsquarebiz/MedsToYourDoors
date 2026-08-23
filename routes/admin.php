@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ShippingMethodController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,7 +62,10 @@ Route::middleware(['auth', 'verified', 'admin'])
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
-        Route::post('shipping-methods', [SettingsController::class, 'storeShippingMethod'])->name('shipping-methods.store');
-        Route::put('shipping-methods/{method}', [SettingsController::class, 'updateShippingMethod'])->name('shipping-methods.update');
-        Route::delete('shipping-methods/{method}', [SettingsController::class, 'destroyShippingMethod'])->name('shipping-methods.destroy');
+        Route::post('settings/branding', [SettingsController::class, 'updateBranding'])->name('settings.branding.update');
+
+        Route::get('shipping-methods', [ShippingMethodController::class, 'index'])->name('shipping-methods.index');
+        Route::post('shipping-methods', [ShippingMethodController::class, 'store'])->name('shipping-methods.store');
+        Route::put('shipping-methods/{method}', [ShippingMethodController::class, 'update'])->name('shipping-methods.update');
+        Route::delete('shipping-methods/{method}', [ShippingMethodController::class, 'destroy'])->name('shipping-methods.destroy');
     });

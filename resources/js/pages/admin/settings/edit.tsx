@@ -1,33 +1,23 @@
+import { BrandingForm } from '@/components/admin/branding-form';
 import { FormCard, FormField } from '@/components/admin/form-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin-layout';
-import { type BreadcrumbItem, type SelectOption } from '@/types';
-import { router, useForm } from '@inertiajs/react';
+import { type BreadcrumbItem } from '@/types';
+import { useForm } from '@inertiajs/react';
 import { type FormEventHandler } from 'react';
-
-interface ShippingMethodRow {
-    id: number;
-    name: string;
-    description: string | null;
-    type: string;
-    type_label: string;
-    rate: { formatted: string; decimal: string };
-    free_over: { formatted: string; decimal: string } | null;
-    is_active: boolean;
-    position: number;
-}
 
 interface AdminSettingsProps {
     settings: Record<string, unknown>;
-    shipping_methods: { data: ShippingMethodRow[] } | ShippingMethodRow[];
-    shipping_types: SelectOption[];
+    branding: {
+        logo_url: string | null;
+        favicon_url: string | null;
+    };
 }
 
 const str = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
-export default function AdminSettings({ settings, shipping_methods, shipping_types }: AdminSettingsProps) {
-    const methods = Array.isArray(shipping_methods) ? shipping_methods : shipping_methods.data;
+export default function AdminSettings({ settings, branding }: AdminSettingsProps) {
     const form = useForm({
         store: {
             name: str(settings['store.name']),
@@ -50,24 +40,9 @@ export default function AdminSettings({ settings, shipping_methods, shipping_typ
         },
     });
 
-    const shippingForm = useForm({
-        name: 'Standard shipping',
-        description: '',
-        type: 'flat_rate',
-        rate: '5.99',
-        free_over: '',
-        is_active: true,
-        position: 1,
-    });
-
     const submit: FormEventHandler = (event) => {
         event.preventDefault();
         form.put('/admin/settings');
-    };
-
-    const addShipping: FormEventHandler = (event) => {
-        event.preventDefault();
-        shippingForm.post('/admin/shipping-methods', { onSuccess: () => shippingForm.reset() });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -76,7 +51,7 @@ export default function AdminSettings({ settings, shipping_methods, shipping_typ
     ];
 
     return (
-        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store, checkout, shipping and SEO.">
+        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store details, branding, checkout and SEO.">
             <form onSubmit={submit} className="grid gap-6 lg:grid-cols-2">
                 <FormCard title="Store">
                     <FormField label="Name" htmlFor="store_name">
@@ -133,37 +108,11 @@ export default function AdminSettings({ settings, shipping_methods, shipping_typ
             </form>
 
             <section className="space-y-4">
-                <h2 className="text-lg font-medium">Shipping methods</h2>
-                <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 dark:divide-neutral-800 dark:border-neutral-800">
-                    {methods.map((method) => (
-                        <li key={method.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                            <span>
-                                {method.name} · {method.rate.formatted}
-                            </span>
-                            <Button variant="ghost" size="sm" onClick={() => router.delete(`/admin/shipping-methods/${method.id}`)}>
-                                Remove
-                            </Button>
-                        </li>
-                    ))}
-                </ul>
-                <form onSubmit={addShipping} className="grid gap-3 rounded-xl border border-neutral-200 p-4 sm:grid-cols-4 dark:border-neutral-800">
-                    <Input placeholder="Name" value={shippingForm.data.name} onChange={(event) => shippingForm.setData('name', event.target.value)} />
-                    <select
-                        value={shippingForm.data.type}
-                        onChange={(event) => shippingForm.setData('type', event.target.value)}
-                        className="h-9 rounded-md border border-neutral-300 bg-transparent px-3 text-sm dark:border-neutral-700"
-                    >
-                        {shipping_types.map((type) => (
-                            <option key={type.value} value={type.value}>
-                                {type.label}
-                            </option>
-                        ))}
-                    </select>
-                    <Input placeholder="Rate" value={shippingForm.data.rate} onChange={(event) => shippingForm.setData('rate', event.target.value)} />
-                    <Button type="submit" disabled={shippingForm.processing}>
-                        Add method
-                    </Button>
-                </form>
+                <div>
+                    <h2 className="text-lg font-medium">Branding</h2>
+                    <p className="text-muted-foreground text-sm">Logo and favicon uploads are saved separately from store text settings.</p>
+                </div>
+                <BrandingForm logoUrl={branding.logo_url} faviconUrl={branding.favicon_url} />
             </section>
         </AdminLayout>
     );

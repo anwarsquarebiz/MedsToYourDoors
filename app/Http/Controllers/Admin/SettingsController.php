@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\ShippingMethodType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Settings\UpdateBrandingSettingsRequest;
 use App\Http\Requests\Admin\Settings\UpdateStoreSettingsRequest;
-use App\Http\Requests\Admin\Shipping\ShippingMethodFormRequest;
-use App\Http\Resources\ShippingMethodResource;
-use App\Models\ShippingMethod;
+use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
-use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SettingsController extends Controller
 {
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly BrandingService $branding,
+    ) {}
 
     public function edit(): Response
     {
@@ -24,10 +24,10 @@ class SettingsController extends Controller
 
         return Inertia::render('admin/settings/edit', [
             'settings' => $this->settings->all(),
-            'shipping_methods' => ShippingMethodResource::collection(
-                ShippingMethod::query()->orderBy('position')->orderBy('id')->get()
-            ),
-            'shipping_types' => ShippingMethodType::options(),
+            'branding' => [
+                'logo_url' => $this->branding->logoUrl(),
+                'favicon_url' => $this->branding->faviconUrl(),
+            ],
         ]);
     }
 
@@ -61,45 +61,17 @@ class SettingsController extends Controller
         return back()->with('success', 'Settings saved.');
     }
 
-    public function storeShippingMethod(ShippingMethodFormRequest $request): RedirectResponse
+    public function updateBranding(UpdateBrandingSettingsRequest $request): RedirectResponse
     {
-        ShippingMethod::query()->create($this->shippingAttributes($request->validated()));
+        $validated = $request->validated();
 
-        return back()->with('success', 'Shipping method added.');
-    }
+        $this->branding->update([
+            'logo' => $request->file('logo'),
+            'remove_logo' => $validated['remove_logo'] ?? false,
+            'favicon' => $request->file('favicon'),
+            'remove_favicon' => $validated['remove_favicon'] ?? false,
+        ]);
 
-    public function updateShippingMethod(ShippingMethodFormRequest $request, ShippingMethod $method): RedirectResponse
-    {
-        $method->update($this->shippingAttributes($request->validated()));
-
-        return back()->with('success', 'Shipping method saved.');
-    }
-
-    public function destroyShippingMethod(ShippingMethod $method): RedirectResponse
-    {
-        abort_unless(request()->user()?->isAdmin(), 403);
-
-        $method->delete();
-
-        return back()->with('success', 'Shipping method removed.');
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    private function shippingAttributes(array $data): array
-    {
-        return [
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'type' => $data['type'],
-            'rate_amount' => Money::fromDecimal($data['rate']),
-            'free_over_amount' => ($data['free_over'] ?? null) === null || $data['free_over'] === ''
-                ? null
-                : Money::fromDecimal($data['free_over']),
-            'is_active' => $data['is_active'] ?? true,
-            'position' => $data['position'] ?? 0,
-        ];
+        return back()->with('success', 'Branding saved.');
     }
 }

@@ -7,6 +7,7 @@ use App\Enums\ProductStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
+use App\Http\Resources\AdminProductResource;
 use App\Http\Resources\ProductDetailResource;
 use App\Models\Collection;
 use App\Models\Product;
@@ -36,7 +37,7 @@ class ProductController extends Controller
         ];
 
         return Inertia::render('admin/products/index', [
-            'products' => $this->repository->paginateForAdmin($filters),
+            'products' => AdminProductResource::collection($this->repository->paginateForAdmin($filters)),
             'filters' => $filters,
             'statuses' => ProductStatus::options(),
             'collections' => $this->collectionOptions(),
