@@ -12,6 +12,19 @@ test('profile page is displayed', function () {
     $response->assertOk();
 });
 
+test('admin profile page shares admin identity for the app sidebar', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->get('/settings/profile')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('settings/profile')
+            ->where('auth.user.is_admin', true)
+            ->where('auth.user.role', 'admin')
+        );
+});
+
 test('profile information can be updated', function () {
     $user = User::factory()->create();
 

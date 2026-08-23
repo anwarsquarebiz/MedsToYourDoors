@@ -35,7 +35,7 @@ class CartItemController extends Controller
             return back()->with('error', $exception->getMessage());
         }
 
-        return back()->with('success', 'Added to your cart.');
+        return back()->with('open_cart', true);
     }
 
     public function update(UpdateCartItemRequest $request, CartItem $item): RedirectResponse

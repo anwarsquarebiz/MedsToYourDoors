@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\CartItemResource;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
 use App\Services\Settings\BrandingService;
@@ -87,12 +88,13 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
                 'warning' => $request->session()->get('warning'),
+                'open_cart' => (bool) $request->session()->get('open_cart'),
             ],
         ];
     }
 
     /**
-     * The header badge: item count and payable total, nothing more.
+     * Header badge plus line items for the storefront cart drawer.
      *
      * @return array<string, mixed>
      */
@@ -107,6 +109,9 @@ class HandleInertiaRequests extends Middleware
             'discount' => $totals->discount->toArray(),
             'total' => $totals->total()->toArray(),
             'coupon_code' => $totals->couponCode,
+            'items' => $cart === null
+                ? []
+                : CartItemResource::collection($cart->items->sortBy('id')->values())->resolve(),
         ];
     }
 }

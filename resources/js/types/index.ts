@@ -45,6 +45,8 @@ export interface FlashMessages {
     success?: string | null;
     error?: string | null;
     warning?: string | null;
+    /** When true, the storefront cart drawer should open (e.g. after add-to-cart). */
+    open_cart?: boolean;
 }
 
 export interface NavLink {
@@ -58,13 +60,14 @@ export interface StorefrontNavigation {
     pages: NavLink[];
 }
 
-/** Lightweight cart totals shared on every request for the header badge. */
+/** Cart summary shared on every storefront request for the header and drawer. */
 export interface CartSummary {
     item_count: number;
     subtotal: Money;
     discount: Money;
     total: Money;
     coupon_code: string | null;
+    items: CartLine[];
 }
 
 

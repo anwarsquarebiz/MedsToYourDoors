@@ -46,6 +46,30 @@ it('adds an item to a customer cart and shows it', function () {
     expect(Cart::query()->where('user_id', $user->id)->count())->toBe(1);
 });
 
+it('flashes open_cart and shares drawer line items after adding a product', function () {
+    $user = User::factory()->customer()->create();
+    $variant = ProductVariant::factory()->for(Product::factory())->create(['price_amount' => 1500]);
+
+    $this->actingAs($user)
+        ->from('/products/'.$variant->product->slug)
+        ->post('/cart/items', [
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ])
+        ->assertRedirect('/products/'.$variant->product->slug)
+        ->assertSessionHas('open_cart', true);
+
+    $this->actingAs($user)
+        ->get('/products/'.$variant->product->slug)
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('cart.item_count', 1)
+            ->has('cart.items', 1)
+            ->where('cart.items.0.product.title', $variant->product->title)
+            ->where('cart.subtotal.amount', 1500)
+        );
+});
+
 it('updates and removes a line', function () {
     $user = User::factory()->customer()->create();
     addLiveVariantToCart($user, ['inventory_quantity' => 10], 1);

@@ -3,7 +3,7 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type AuthUser } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LayoutGrid, LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: AuthUser;
@@ -21,6 +21,14 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+                {user.is_admin && (
+                    <DropdownMenuItem asChild>
+                        <Link className="block w-full" href="/admin" as="button" prefetch onClick={cleanup}>
+                            <LayoutGrid className="mr-2" />
+                            Admin panel
+                        </Link>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />

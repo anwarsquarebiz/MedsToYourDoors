@@ -1,4 +1,5 @@
 import { FlashMessages } from '@/components/flash-messages';
+import { CartDrawer, useCartDrawer } from '@/components/storefront/cart-drawer';
 import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -12,6 +13,7 @@ interface StorefrontLayoutProps {
 
 export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
     const { auth, store, navigation, cart } = usePage<SharedData>().props;
+    const { open: cartOpen, setOpen: setCartOpen, openCart } = useCartDrawer();
 
     const collections = navigation?.collections ?? [];
     const pages = navigation?.pages ?? [];
@@ -79,15 +81,21 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                             </Link>
                         </Button>
 
-                        <Button variant="ghost" size="icon" asChild className="relative" aria-label={`Cart, ${cartCount} items`}>
-                            <Link href="/cart">
-                                <ShoppingBag className="size-5" />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white dark:bg-white dark:text-neutral-900">
-                                        {cartCount > 99 ? '99+' : cartCount}
-                                    </span>
-                                )}
-                            </Link>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="relative"
+                            aria-label={`Cart, ${cartCount} items`}
+                            aria-expanded={cartOpen}
+                            onClick={openCart}
+                        >
+                            <ShoppingBag className="size-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white dark:bg-white dark:text-neutral-900">
+                                    {cartCount > 99 ? '99+' : cartCount}
+                                </span>
+                            )}
                         </Button>
                     </div>
                 </div>
@@ -158,6 +166,8 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     © {new Date().getFullYear()} {store.name}. All rights reserved.
                 </div>
             </footer>
+
+            <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
         </div>
     );
 }
