@@ -22,12 +22,12 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
     const primaryLinks = [{ title: 'All products', url: '/products' }, ...collections.slice(0, 5), { title: 'Journal', url: '/blogs/news' }];
 
     return (
-        <div className="flex min-h-screen flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50">
-            <p className="bg-neutral-900 px-4 py-2 text-center text-xs font-medium text-white dark:bg-neutral-800">
+        <div className="bg-background text-foreground flex min-h-screen flex-col">
+            <p className="bg-primary text-primary-foreground px-4 py-2 text-center text-xs font-medium">
                 Free shipping on orders over $50 · Licensed pharmacy partners
             </p>
 
-            <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
+            <header className="bg-background/90 sticky top-0 z-40 border-b border-neutral-200 backdrop-blur dark:border-neutral-800">
                 <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
                     <Sheet>
                         <SheetTrigger asChild>
@@ -42,7 +42,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                                     <Link
                                         key={link.url}
                                         href={link.url}
-                                        className="rounded-md px-3 py-2 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                        className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium"
                                     >
                                         {link.title}
                                     </Link>
@@ -52,10 +52,12 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </Sheet>
 
                     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                        <span className="flex size-8 items-center justify-center overflow-hidden rounded-lg text-white">
+                        <span
+                            className={`flex size-8 items-center justify-center overflow-hidden rounded-lg ${store.logo_url ? '' : 'bg-primary text-primary-foreground'}`}
+                        >
                             <StoreLogo
                                 imageClassName="h-full w-full object-contain"
-                                fallbackClassName="size-4 fill-current text-white dark:text-neutral-900"
+                                fallbackClassName="size-4 fill-current text-primary-foreground"
                             />
                         </span>
                         <span className="hidden sm:inline">{store.name}</span>
@@ -67,7 +69,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                                 key={link.url}
                                 href={link.url}
                                 prefetch
-                                className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white"
+                                className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium text-neutral-600 transition-colors dark:text-neutral-300"
                             >
                                 {link.title}
                             </Link>
@@ -92,7 +94,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         >
                             <ShoppingBag className="size-5" />
                             {cartCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white dark:bg-white dark:text-neutral-900">
+                                <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
                                     {cartCount > 99 ? '99+' : cartCount}
                                 </span>
                             )}
@@ -108,7 +110,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                 {children}
             </main>
 
-            <footer className="mt-16 border-t border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900">
+            <footer className="bg-accent mt-16 border-t border-neutral-200 dark:border-neutral-800">
                 <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
                     <div className="space-y-3">
                         <p className="font-semibold">{store.name}</p>
@@ -121,13 +123,13 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         <p className="text-sm font-semibold">Shop</p>
                         <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
                             <li>
-                                <Link href="/products" className="hover:text-neutral-900 dark:hover:text-white">
+                                <Link href="/products" className="hover:text-primary">
                                     All products
                                 </Link>
                             </li>
                             {collections.slice(0, 4).map((collection) => (
                                 <li key={collection.url}>
-                                    <Link href={collection.url} className="hover:text-neutral-900 dark:hover:text-white">
+                                    <Link href={collection.url} className="hover:text-primary">
                                         {collection.title}
                                     </Link>
                                 </li>
@@ -140,7 +142,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
                             {pages.map((page) => (
                                 <li key={page.url}>
-                                    <Link href={page.url} className="hover:text-neutral-900 dark:hover:text-white">
+                                    <Link href={page.url} className="hover:text-primary">
                                         {page.title}
                                     </Link>
                                 </li>
@@ -154,7 +156,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                             {store.email && <li>{store.email}</li>}
                             {store.phone && <li>{store.phone}</li>}
                             <li>
-                                <Link href={auth.user ? '/account/orders' : '/login'} className="hover:text-neutral-900 dark:hover:text-white">
+                                <Link href={auth.user ? '/account/orders' : '/login'} className="hover:text-primary">
                                     Order history
                                 </Link>
                             </li>

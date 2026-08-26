@@ -214,8 +214,8 @@ function bestValueOptionValue(option: ProductOption, variants: ProductVariant[],
 function pickerButtonClass(isSelected: boolean, unavailable = false): string {
     return `flex flex-col items-start gap-0.5 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
         isSelected
-            ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-            : 'border-neutral-300 bg-white hover:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-950'
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-neutral-300 bg-white hover:border-primary/50 dark:border-neutral-700 dark:bg-neutral-950'
     } ${unavailable ? 'opacity-50' : ''}`;
 }
 
@@ -301,7 +301,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
             <div className="border-b border-neutral-200 bg-neutral-50/80 dark:border-neutral-800 dark:bg-neutral-900/40">
                 <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6">
                     <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 dark:text-neutral-400">
-                        <Link href="/products" prefetch className="hover:text-neutral-900 dark:hover:text-white">
+                        <Link href="/products" prefetch className="hover:text-primary">
                             Products
                         </Link>
                         <span className="mx-2">/</span>
@@ -344,7 +344,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                         aria-pressed={index === activeImage}
                                         className={`aspect-square overflow-hidden rounded-xl border-2 bg-neutral-50 transition-colors dark:bg-neutral-900 ${
                                             index === activeImage
-                                                ? 'border-neutral-900 dark:border-white'
+                                                ? 'border-primary'
                                                 : 'border-transparent hover:border-neutral-300 dark:hover:border-neutral-600'
                                         }`}
                                     >
@@ -448,8 +448,8 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                                             <span
                                                                 className={`absolute -top-2 right-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${
                                                                     isSelected
-                                                                        ? 'bg-white text-neutral-900 dark:bg-neutral-900 dark:text-white'
-                                                                        : 'bg-teal-700 text-white'
+                                                                        ? 'bg-primary-foreground text-primary'
+                                                                        : 'bg-primary text-primary-foreground'
                                                                 }`}
                                                             >
                                                                 Best value
@@ -549,7 +549,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                     key={label}
                                     className="flex items-center gap-3 text-sm text-neutral-700 dark:text-neutral-300"
                                 >
-                                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-900">
+                                    <span className="bg-accent text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                                         <Icon className="size-4" />
                                     </span>
                                     {label}
@@ -565,7 +565,7 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                                         key={collection.id}
                                         href={collection.url}
                                         prefetch
-                                        className="rounded-full border border-neutral-200 px-3 py-1 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                                        className="hover:border-primary/40 hover:bg-accent rounded-full border border-neutral-200 px-3 py-1 dark:border-neutral-700"
                                     >
                                         {collection.title}
                                     </Link>

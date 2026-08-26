@@ -22,7 +22,7 @@ class SettingsService
      */
     public const Defaults = [
         'store.name' => 'Meds To Your Doors',
-        'store.email' => 'support@example.com',
+        'store.email' => 'support@medstoyourdoors.com',
         'store.phone' => '',
         'store.address' => '',
         'store.currency' => 'USD',

@@ -46,8 +46,8 @@ export function Pagination({ paginator }: PaginationProps) {
                             preserveScroll
                             className={`rounded-md px-3 py-2 text-sm transition-colors ${
                                 link.active
-                                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
-                                    : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'hover:bg-accent text-neutral-600 dark:text-neutral-300'
                             }`}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />

@@ -7,7 +7,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         <Link
             href={product.url}
             prefetch
-            className="group flex flex-col gap-3 rounded-xl border border-neutral-200 p-3 transition-shadow hover:shadow-md dark:border-neutral-800"
+            className="hover:border-primary/40 group flex flex-col gap-3 rounded-xl border border-neutral-200 p-3 transition-shadow hover:shadow-md dark:border-neutral-800"
         >
             <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800">
                 {product.image ? (

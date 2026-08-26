@@ -40,14 +40,14 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                             <Link
                                 href="/products"
                                 prefetch
-                                className="rounded-lg bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-5 py-3 text-sm font-medium transition-colors"
                             >
                                 Shop all products
                             </Link>
                             <Link
                                 href="/collections"
                                 prefetch
-                                className="rounded-lg border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                                className="hover:bg-accent rounded-lg border border-neutral-300 px-5 py-3 text-sm font-medium transition-colors dark:border-neutral-700"
                             >
                                 Browse collections
                             </Link>
@@ -87,7 +87,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                 <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
                     <div className="mb-6 flex items-baseline justify-between">
                         <h2 className="text-2xl font-semibold tracking-tight">New arrivals</h2>
-                        <Link href="/products" prefetch className="text-sm font-medium underline-offset-4 hover:underline">
+                        <Link href="/products" prefetch className="text-primary text-sm font-medium underline-offset-4 hover:underline">
                             View all
                         </Link>
                     </div>
@@ -103,7 +103,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                 <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
                     {guarantees.map(({ icon: Icon, title, description }) => (
                         <div key={title} className="flex gap-4">
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
+                            <span className="bg-accent text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
                                 <Icon className="size-5" />
                             </span>
                             <div className="space-y-1">
