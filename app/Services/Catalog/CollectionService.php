@@ -176,5 +176,6 @@ class CollectionService
     {
         CacheKeys::bump(CacheKeys::Collections);
         CacheKeys::bump(CacheKeys::Products);
+        CacheKeys::bump(CacheKeys::Navigation);
     }
 }

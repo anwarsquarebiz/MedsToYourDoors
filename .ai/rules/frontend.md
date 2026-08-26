@@ -6,7 +6,7 @@ Globs: `resources/js/**`
 - Pages live in `resources/js/pages`, mirroring the backend surface: `pages/admin/**` and `pages/storefront/**`.
 - Two layouts:
   - `layouts/admin-layout.tsx` — sidebar shell, takes `title`, optional `description` and `actions`, renders flash messages and the page heading for you. Do not add your own `<Head>` title in an admin page; the layout sets it.
-  - `layouts/storefront-layout.tsx` — customer header, mobile sheet nav, cart badge and footer.
+  - `layouts/storefront-layout.tsx` — customer header, mobile sheet nav, cart badge and footer. Header links come from shared `navigation.header` (admin Navigation menu), not hardcoded routes.
 - Navigate with Inertia's `<Link>`, never a bare `<a>` for internal routes. Add `prefetch` to primary navigation.
 - Forms use the `useForm` hook (the `<Form>` component requires Inertia 2.1+). Always `e.preventDefault()` in the submit handler and surface `errors.<field>` with `InputError`.
 - Dark mode is supported throughout: every colour utility needs its `dark:` counterpart.

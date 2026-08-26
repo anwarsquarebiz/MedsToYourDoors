@@ -29,6 +29,8 @@ final class CacheKeys
 
     public const Banners = 'banners';
 
+    public const Navigation = 'navigation';
+
     /**
      * All invalidatable domains, used by the cache:clear tooling and tests.
      *
@@ -44,6 +46,7 @@ final class CacheKeys
             self::Settings,
             self::ShippingMethods,
             self::Banners,
+            self::Navigation,
         ];
     }
 

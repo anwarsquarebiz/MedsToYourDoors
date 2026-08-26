@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\CouponType;
+use App\Enums\NavigationLinkType;
 use App\Enums\ProductStatus;
 use App\Enums\PublishStatus;
 use App\Enums\ShippingMethodType;
@@ -11,6 +12,7 @@ use App\Models\Blog;
 use App\Models\BlogPost;
 use App\Models\Collection;
 use App\Models\Coupon;
+use App\Models\NavigationItem;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -55,6 +57,7 @@ class DatabaseSeeder extends Seeder
         $this->catalog();
         $this->blog($admin);
         $this->coupons();
+        $this->navigation();
     }
 
     private function pages(): void
@@ -200,5 +203,49 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ],
         );
+    }
+
+    private function navigation(): void
+    {
+        if (NavigationItem::query()->exists()) {
+            return;
+        }
+
+        NavigationItem::query()->create([
+            'menu' => NavigationItem::MenuHeader,
+            'title' => 'All products',
+            'type' => NavigationLinkType::Catalog,
+            'position' => 1,
+        ]);
+
+        $position = 2;
+
+        Collection::query()
+            ->published()
+            ->orderBy('position')
+            ->orderBy('title')
+            ->limit(5)
+            ->get()
+            ->each(function (Collection $collection) use (&$position): void {
+                NavigationItem::query()->create([
+                    'menu' => NavigationItem::MenuHeader,
+                    'title' => $collection->title,
+                    'type' => NavigationLinkType::Collection,
+                    'resource_id' => $collection->id,
+                    'position' => $position,
+                ]);
+                $position++;
+            });
+
+        $blog = Blog::query()->orderBy('id')->first();
+
+        NavigationItem::query()->create([
+            'menu' => NavigationItem::MenuHeader,
+            'title' => 'Journal',
+            'type' => $blog === null ? NavigationLinkType::Url : NavigationLinkType::Blog,
+            'resource_id' => $blog?->id,
+            'url' => $blog === null ? '/blogs/news' : null,
+            'position' => $position,
+        ]);
     }
 }

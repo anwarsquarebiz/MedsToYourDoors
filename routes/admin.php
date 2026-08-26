@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NavigationItemController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProductController;
@@ -59,6 +60,11 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::post('blog-posts', [BlogController::class, 'storePost'])->name('blog-posts.store');
         Route::put('blog-posts/{post}', [BlogController::class, 'updatePost'])->name('blog-posts.update');
         Route::delete('blog-posts/{post}', [BlogController::class, 'destroyPost'])->name('blog-posts.destroy');
+
+        Route::get('navigation', [NavigationItemController::class, 'index'])->name('navigation.index');
+        Route::post('navigation', [NavigationItemController::class, 'store'])->name('navigation.store');
+        Route::put('navigation/{navigationItem}', [NavigationItemController::class, 'update'])->name('navigation.update');
+        Route::delete('navigation/{navigationItem}', [NavigationItemController::class, 'destroy'])->name('navigation.destroy');
 
         Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');

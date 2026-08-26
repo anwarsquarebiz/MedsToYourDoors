@@ -75,6 +75,7 @@ class HandleInertiaRequests extends Middleware
                 'favicon_url' => $this->branding->faviconUrl(),
             ],
             'navigation' => fn (): array => [
+                'header' => $this->navigation->header(),
                 'collections' => $this->navigation->collections(),
                 'pages' => $this->navigation->pages(),
             ],

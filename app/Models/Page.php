@@ -38,8 +38,14 @@ class Page extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => CacheKeys::bump(CacheKeys::Pages));
-        static::deleted(fn () => CacheKeys::bump(CacheKeys::Pages));
+        static::saved(function (): void {
+            CacheKeys::bump(CacheKeys::Pages);
+            CacheKeys::bump(CacheKeys::Navigation);
+        });
+        static::deleted(function (): void {
+            CacheKeys::bump(CacheKeys::Pages);
+            CacheKeys::bump(CacheKeys::Navigation);
+        });
     }
 
     /**

@@ -23,8 +23,14 @@ class Blog extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => CacheKeys::bump(CacheKeys::Blogs));
-        static::deleted(fn () => CacheKeys::bump(CacheKeys::Blogs));
+        static::saved(function (): void {
+            CacheKeys::bump(CacheKeys::Blogs);
+            CacheKeys::bump(CacheKeys::Navigation);
+        });
+        static::deleted(function (): void {
+            CacheKeys::bump(CacheKeys::Blogs);
+            CacheKeys::bump(CacheKeys::Navigation);
+        });
     }
 
     /**

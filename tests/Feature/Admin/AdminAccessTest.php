@@ -38,5 +38,6 @@ it('keeps a customer out of every admin section', function (string $path) {
     '/admin/pages',
     '/admin/blogs',
     '/admin/settings',
+    '/admin/navigation',
     '/admin/shipping-methods',
 ]);

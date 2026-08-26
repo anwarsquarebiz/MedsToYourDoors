@@ -3,7 +3,7 @@ import { CartDrawer, useCartDrawer } from '@/components/storefront/cart-drawer';
 import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { type SharedData } from '@/types';
+import { type NavLink, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, ShoppingBag, User } from 'lucide-react';
 
@@ -17,9 +17,8 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
 
     const collections = navigation?.collections ?? [];
     const pages = navigation?.pages ?? [];
+    const headerLinks = navigation?.header ?? [];
     const cartCount = cart?.item_count ?? 0;
-
-    const primaryLinks = [{ title: 'All products', url: '/products' }, ...collections.slice(0, 5), { title: 'Journal', url: '/blogs/news' }];
 
     return (
         <div className="bg-background text-foreground flex min-h-screen flex-col">
@@ -38,14 +37,8 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         <SheetContent side="left" className="w-72 p-6">
                             <SheetTitle className="text-left text-base">Menu</SheetTitle>
                             <nav className="mt-6 flex flex-col gap-1">
-                                {primaryLinks.map((link) => (
-                                    <Link
-                                        key={link.url}
-                                        href={link.url}
-                                        className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium"
-                                    >
-                                        {link.title}
-                                    </Link>
+                                {headerLinks.map((link, index) => (
+                                    <HeaderNavLink key={`${link.url}-${index}`} link={link} className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium" />
                                 ))}
                             </nav>
                         </SheetContent>
@@ -53,7 +46,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
 
                     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
                         <span
-                            className={`flex size-8 items-center justify-center overflow-hidden rounded-lg ${store.logo_url ? '' : 'bg-primary text-primary-foreground'}`}
+                            className={`flex size-12 items-center justify-center overflow-hidden rounded-lg ${store.logo_url ? '' : 'bg-primary text-primary-foreground'}`}
                         >
                             <StoreLogo
                                 imageClassName="h-full w-full object-contain"
@@ -64,15 +57,13 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </Link>
 
                     <nav className="ml-6 hidden items-center gap-1 lg:flex">
-                        {primaryLinks.map((link) => (
-                            <Link
-                                key={link.url}
-                                href={link.url}
+                        {headerLinks.map((link, index) => (
+                            <HeaderNavLink
+                                key={`${link.url}-${index}`}
+                                link={link}
                                 prefetch
                                 className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium text-neutral-600 transition-colors dark:text-neutral-300"
-                            >
-                                {link.title}
-                            </Link>
+                            />
                         ))}
                     </nav>
 
@@ -171,5 +162,29 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
 
             <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
         </div>
+    );
+}
+
+function HeaderNavLink({
+    link,
+    className,
+    prefetch = false,
+}: {
+    link: NavLink;
+    className: string;
+    prefetch?: boolean;
+}) {
+    if (link.external) {
+        return (
+            <a href={link.url} className={className} rel="noopener noreferrer">
+                {link.title}
+            </a>
+        );
+    }
+
+    return (
+        <Link href={link.url} prefetch={prefetch} className={className}>
+            {link.title}
+        </Link>
     );
 }

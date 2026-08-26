@@ -52,10 +52,12 @@ export interface FlashMessages {
 export interface NavLink {
     title: string;
     url: string;
+    external?: boolean;
 }
 
 /** Storefront navigation, shared on every storefront request. */
 export interface StorefrontNavigation {
+    header: NavLink[];
     collections: NavLink[];
     pages: NavLink[];
 }
