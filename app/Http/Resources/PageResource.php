@@ -23,6 +23,7 @@ class PageResource extends JsonResource
             'excerpt' => $this->excerpt,
             'content' => $this->content,
             'status' => $this->status->value,
+            'template' => $this->template->value,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
             'meta_title' => $this->metaTitle(),

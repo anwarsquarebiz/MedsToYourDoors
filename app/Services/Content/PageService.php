@@ -3,6 +3,7 @@
 namespace App\Services\Content;
 
 use App\Models\Page;
+use App\Support\RichText;
 use Illuminate\Support\Str;
 
 class PageService
@@ -53,7 +54,7 @@ class PageService
         $attributes = [
             'title' => $data['title'],
             'excerpt' => $data['excerpt'] ?? null,
-            'content' => $data['content'] ?? null,
+            'content' => RichText::sanitize($data['content'] ?? null),
             'seo_title' => $data['seo_title'] ?? null,
             'seo_description' => $data['seo_description'] ?? null,
             'published_at' => $data['published_at'] ?? null,
@@ -61,6 +62,10 @@ class PageService
 
         if (array_key_exists('status', $data)) {
             $attributes['status'] = $data['status'];
+        }
+
+        if (array_key_exists('template', $data)) {
+            $attributes['template'] = $data['template'];
         }
 
         $requestedSlug = $data['slug'] ?? null;

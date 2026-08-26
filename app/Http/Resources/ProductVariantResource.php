@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\PresentsDisplayMoney;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -11,6 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ProductVariantResource extends JsonResource
 {
+    use PresentsDisplayMoney;
+
     /**
      * @return array<string, mixed>
      */
@@ -22,8 +25,8 @@ class ProductVariantResource extends JsonResource
             'display_title' => $this->displayTitle(),
             'sku' => $this->sku,
             'barcode' => $this->barcode,
-            'price' => $this->price(),
-            'compare_at_price' => $this->compare_at_price_amount,
+            'price' => $this->displayMoney($this->price()),
+            'compare_at_price' => $this->displayMoney($this->compare_at_price_amount),
             'option1' => $this->option1,
             'option2' => $this->option2,
             'option3' => $this->option3,

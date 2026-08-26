@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Storefront;
 
+use App\Services\Currency\CurrencyConverter;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductIndexRequest extends FormRequest
@@ -29,7 +30,7 @@ class ProductIndexRequest extends FormRequest
     }
 
     /**
-     * The filters, normalised for the repository.
+     * Filters as the visitor typed them, in the display currency.
      *
      * @return array{search: string|null, sort: string, in_stock: bool, min_price: string|null, max_price: string|null}
      */
@@ -42,5 +43,21 @@ class ProductIndexRequest extends FormRequest
             'min_price' => $this->filled('min_price') ? (string) $this->input('min_price') : null,
             'max_price' => $this->filled('max_price') ? (string) $this->input('max_price') : null,
         ];
+    }
+
+    /**
+     * Price bounds converted back to the USD base the catalog is stored in.
+     *
+     * @return array{search: string|null, sort: string, in_stock: bool, min_price: string|null, max_price: string|null}
+     */
+    public function catalogFilters(): array
+    {
+        $filters = $this->filters();
+        $converter = app(CurrencyConverter::class);
+
+        $filters['min_price'] = $converter->toBaseDecimal($filters['min_price']);
+        $filters['max_price'] = $converter->toBaseDecimal($filters['max_price']);
+
+        return $filters;
     }
 }

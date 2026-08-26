@@ -1,5 +1,6 @@
 import { FlashMessages } from '@/components/flash-messages';
 import { CartDrawer, useCartDrawer } from '@/components/storefront/cart-drawer';
+import { CurrencySwitcher } from '@/components/storefront/currency-switcher';
 import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -23,7 +24,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
     return (
         <div className="bg-background text-foreground flex min-h-screen flex-col">
             <p className="bg-primary text-primary-foreground px-4 py-2 text-center text-xs font-medium">
-                Free shipping on orders over $50 · Licensed pharmacy partners
+                Free shipping on orders over {store.free_shipping_threshold.formatted} · Licensed pharmacy partners
             </p>
 
             <header className="bg-background/90 sticky top-0 z-40 border-b border-neutral-200 backdrop-blur dark:border-neutral-800">
@@ -41,6 +42,10 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                                     <HeaderNavLink key={`${link.url}-${index}`} link={link} className="hover:bg-accent hover:text-primary rounded-md px-3 py-2 text-sm font-medium" />
                                 ))}
                             </nav>
+                            <div className="mt-6 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+                                <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold tracking-wide uppercase">Currency</p>
+                                <CurrencySwitcher />
+                            </div>
                         </SheetContent>
                     </Sheet>
 
@@ -68,6 +73,8 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </nav>
 
                     <div className="ml-auto flex items-center gap-1">
+                        <CurrencySwitcher compact />
+
                         <Button variant="ghost" size="icon" asChild aria-label={auth.user ? 'Your account' : 'Sign in'}>
                             <Link href={auth.user ? '/account' : '/login'}>
                                 <User className="size-5" />

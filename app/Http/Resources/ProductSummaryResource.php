@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\PresentsDisplayMoney;
 use App\Models\Product;
 use App\Support\Money;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ProductSummaryResource extends JsonResource
 {
+    use PresentsDisplayMoney;
+
     /**
      * @return array<string, mixed>
      */
@@ -30,8 +33,8 @@ class ProductSummaryResource extends JsonResource
             'vendor' => $this->vendor,
             'product_type' => $this->product_type,
             'url' => route('products.show', $this->slug),
-            'price_from' => $this->priceFrom(),
-            'compare_at_price' => $this->highestCompareAtPrice(),
+            'price_from' => $this->displayMoney($this->priceFrom()),
+            'compare_at_price' => $this->displayMoney($this->highestCompareAtPrice()),
             'on_sale' => $this->variants->contains(fn ($variant): bool => $variant->isOnSale()),
             'in_stock' => $this->isInStock(),
             'variant_count' => $this->variants->count(),

@@ -100,8 +100,60 @@ it('removes a menu item', function () {
     expect(NavigationItem::query()->count())->toBe(0);
 });
 
+it('reorders header menu items', function () {
+    $first = NavigationItem::factory()->catalog()->create(['title' => 'Shop', 'position' => 1]);
+    $second = NavigationItem::factory()->home()->create(['title' => 'Home', 'position' => 2]);
+    $third = NavigationItem::factory()->customUrl('/blogs/news')->create(['title' => 'Journal', 'position' => 3]);
+
+    $this->actingAs($this->admin)
+        ->put('/admin/navigation/order', [
+            'ids' => [$third->id, $first->id, $second->id],
+        ])
+        ->assertRedirect();
+
+    expect($third->fresh()->position)->toBe(1)
+        ->and($first->fresh()->position)->toBe(2)
+        ->and($second->fresh()->position)->toBe(3);
+});
+
+it('keeps omitted items at the end when reordering', function () {
+    $first = NavigationItem::factory()->catalog()->create(['position' => 1]);
+    $second = NavigationItem::factory()->home()->create(['position' => 2]);
+    $third = NavigationItem::factory()->customUrl()->create(['position' => 3]);
+
+    $this->actingAs($this->admin)
+        ->put('/admin/navigation/order', [
+            'ids' => [$third->id, $first->id],
+        ])
+        ->assertRedirect();
+
+    expect($third->fresh()->position)->toBe(1)
+        ->and($first->fresh()->position)->toBe(2)
+        ->and($second->fresh()->position)->toBe(3);
+});
+
+it('rejects unknown ids when reordering', function () {
+    NavigationItem::factory()->catalog()->create();
+
+    $this->actingAs($this->admin)
+        ->put('/admin/navigation/order', [
+            'ids' => [999_999],
+        ])
+        ->assertSessionHasErrors('ids.0');
+});
+
 it('keeps customers out of navigation', function () {
     $this->actingAs(User::factory()->customer()->create())
         ->get('/admin/navigation')
+        ->assertForbidden();
+});
+
+it('keeps customers from reordering navigation', function () {
+    $item = NavigationItem::factory()->catalog()->create();
+
+    $this->actingAs(User::factory()->customer()->create())
+        ->put('/admin/navigation/order', [
+            'ids' => [$item->id],
+        ])
         ->assertForbidden();
 });

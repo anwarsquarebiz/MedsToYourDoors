@@ -5,10 +5,13 @@ namespace App\Http\Middleware;
 use App\Http\Resources\CartItemResource;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
+use App\Services\Currency\CurrencyConverter;
+use App\Services\Currency\CurrencyService;
 use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
 use App\Services\Storefront\NavigationService;
 use App\Support\CartTotals;
+use App\Support\Money;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,6 +32,8 @@ class HandleInertiaRequests extends Middleware
         private readonly NavigationService $navigation,
         private readonly CartResolver $cartResolver,
         private readonly CartService $carts,
+        private readonly CurrencyService $currencies,
+        private readonly CurrencyConverter $converter,
     ) {}
 
     /**
@@ -69,10 +74,18 @@ class HandleInertiaRequests extends Middleware
                 'name' => $this->settings->get('store.name'),
                 'email' => $this->settings->get('store.email'),
                 'phone' => $this->settings->get('store.phone'),
-                'currency' => config('shop.currency.code'),
+                'currency' => $this->currencies->base(),
                 'social' => $this->settings->group('social')->all(),
                 'logo_url' => $this->branding->logoUrl(),
                 'favicon_url' => $this->branding->faviconUrl(),
+                'free_shipping_threshold' => $this->converter->present(
+                    Money::fromMinor((int) config('shop.currency.free_shipping_threshold_amount', 5000)),
+                ),
+            ],
+            'currency' => fn (): array => [
+                'current' => $this->currencies->current(),
+                'base' => $this->currencies->base(),
+                'options' => $this->currencies->options(),
             ],
             'navigation' => fn (): array => [
                 'header' => $this->navigation->header(),
@@ -103,13 +116,14 @@ class HandleInertiaRequests extends Middleware
     {
         $cart = $this->cartResolver->current();
         $totals = $cart === null ? CartTotals::empty() : $this->carts->totals($cart);
+        $presented = $this->converter->presentTotals($totals);
 
         return [
-            'item_count' => $totals->itemCount,
-            'subtotal' => $totals->subtotal->toArray(),
-            'discount' => $totals->discount->toArray(),
-            'total' => $totals->total()->toArray(),
-            'coupon_code' => $totals->couponCode,
+            'item_count' => $presented['item_count'],
+            'subtotal' => $presented['subtotal'],
+            'discount' => $presented['discount'],
+            'total' => $presented['total'],
+            'coupon_code' => $presented['coupon_code'],
             'items' => $cart === null
                 ? []
                 : CartItemResource::collection($cart->items->sortBy('id')->values())->resolve(),

@@ -34,12 +34,32 @@ it('lets staff create a page', function () {
         ->post('/admin/pages', [
             'title' => 'About Us',
             'slug' => 'about-us',
-            'content' => '<p>Hello</p>',
+            'content' => '<p>Hello <strong>there</strong></p>',
             'status' => 'published',
+            'template' => 'default',
         ])
         ->assertRedirect();
 
     expect(Page::query()->where('slug', 'about-us')->exists())->toBeTrue();
+});
+
+it('strips unsafe html when staff save a page', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->post('/admin/pages', [
+            'title' => 'Safe',
+            'slug' => 'safe',
+            'content' => '<p>Hi</p><script>alert(1)</script>',
+            'status' => 'published',
+            'template' => 'default',
+        ])
+        ->assertRedirect();
+
+    $content = Page::query()->where('slug', 'safe')->value('content');
+
+    expect($content)->toContain('<p>Hi</p>')
+        ->and($content)->not->toContain('<script>');
 });
 
 it('forbids customers from managing pages', function () {

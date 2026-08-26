@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\PageTemplate;
 use App\Enums\PublishStatus;
 use App\Support\CacheKeys;
 use Database\Factories\PageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Page extends Model
 {
@@ -20,9 +22,17 @@ class Page extends Model
         'excerpt',
         'content',
         'status',
+        'template',
         'seo_title',
         'seo_description',
         'published_at',
+    ];
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'template' => PageTemplate::Default->value,
     ];
 
     /**
@@ -32,6 +42,7 @@ class Page extends Model
     {
         return [
             'status' => PublishStatus::class,
+            'template' => PageTemplate::class,
             'published_at' => 'datetime',
         ];
     }
@@ -49,6 +60,14 @@ class Page extends Model
     }
 
     /**
+     * @return HasMany<ContactMessage, $this>
+     */
+    public function contactMessages(): HasMany
+    {
+        return $this->hasMany(ContactMessage::class);
+    }
+
+    /**
      * @param  Builder<Page>  $query
      */
     public function scopePublished(Builder $query): void
@@ -63,6 +82,11 @@ class Page extends Model
         return $this->status === PublishStatus::Published
             && $this->published_at !== null
             && $this->published_at->isPast();
+    }
+
+    public function isContact(): bool
+    {
+        return $this->template === PageTemplate::Contact;
     }
 
     public function metaTitle(): string

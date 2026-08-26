@@ -43,15 +43,13 @@ class CollectionController extends Controller
 
         abort_if($collection === null, 404);
 
-        $filters = $request->filters();
-
         return Inertia::render('storefront/collections/show', [
             'collection' => new CollectionSummaryResource($collection),
             'description' => $collection->description,
             'products' => ProductSummaryResource::collection(
-                $this->products->paginateForCollection($collection, $filters)
+                $this->products->paginateForCollection($collection, $request->catalogFilters())
             ),
-            'filters' => $filters,
+            'filters' => $request->filters(),
             'seo' => [
                 'title' => $collection->metaTitle(),
                 'description' => $collection->metaDescription(),

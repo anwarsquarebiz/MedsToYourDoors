@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\NavigationLinkType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Navigation\NavigationItemFormRequest;
+use App\Http\Requests\Admin\Navigation\ReorderNavigationItemsRequest;
 use App\Http\Resources\NavigationItemResource;
 use App\Models\Blog;
 use App\Models\Collection;
@@ -70,5 +71,12 @@ class NavigationItemController extends Controller
         $this->menus->delete($navigationItem);
 
         return back()->with('success', 'Menu item removed.');
+    }
+
+    public function reorder(ReorderNavigationItemsRequest $request): RedirectResponse
+    {
+        $this->menus->reorder($request->validated('ids'));
+
+        return back();
     }
 }

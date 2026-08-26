@@ -16,13 +16,11 @@ class ProductController extends Controller
 
     public function index(ProductIndexRequest $request): Response
     {
-        $filters = $request->filters();
-
         return Inertia::render('storefront/products/index', [
             'products' => ProductSummaryResource::collection(
-                $this->products->paginatePublished($filters)
+                $this->products->paginatePublished($request->catalogFilters())
             ),
-            'filters' => $filters,
+            'filters' => $request->filters(),
             'seo' => [
                 'title' => 'All products',
                 'description' => 'Browse every product available in our store.',

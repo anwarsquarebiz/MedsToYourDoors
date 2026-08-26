@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\CouponType;
 use App\Enums\NavigationLinkType;
+use App\Enums\PageTemplate;
 use App\Enums\ProductStatus;
 use App\Enums\PublishStatus;
 use App\Enums\ShippingMethodType;
@@ -78,6 +79,7 @@ class DatabaseSeeder extends Seeder
                     'excerpt' => $excerpt,
                     'content' => '<p>'.$excerpt.'</p><p>This policy page can be edited from the admin panel.</p>',
                     'status' => PublishStatus::Published,
+                    'template' => $slug === 'contact-us' ? PageTemplate::Contact : PageTemplate::Default,
                     'published_at' => now()->subDay(),
                 ],
             );

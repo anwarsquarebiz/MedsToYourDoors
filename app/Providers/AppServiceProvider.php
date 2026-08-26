@@ -7,6 +7,10 @@ use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\OrderRepository;
 use App\Repositories\ProductRepository;
+use App\Services\Currency\CurrencyConverter;
+use App\Services\Currency\CurrencyService;
+use App\Services\Currency\ExchangeRateService;
+use App\Services\Currency\GeoCurrencyDetector;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Settings\SettingsService;
 use App\Support\Money;
@@ -25,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(SettingsService::class);
         $this->app->singleton(PaymentGatewayManager::class);
+        $this->app->singleton(CurrencyService::class);
+        $this->app->singleton(ExchangeRateService::class);
+        $this->app->singleton(CurrencyConverter::class);
+        $this->app->singleton(GeoCurrencyDetector::class);
 
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);

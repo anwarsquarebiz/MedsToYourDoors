@@ -12,6 +12,29 @@ it('renders the home page', function () {
         ->assertInertia(fn ($page) => $page
             ->component('storefront/home')
             ->has('banners.data')
+            ->has('collections.data')
+            ->has('newArrivals.data')
+        );
+});
+
+it('shows published collections and latest products on the home page', function () {
+    $collection = Collection::factory()->create(['title' => 'Erectile Dysfunction', 'position' => 1]);
+    Collection::factory()->draft()->create(['title' => 'Hidden collection']);
+
+    $live = Product::factory()->create(['title' => 'Cenforce 100 Mg', 'published_at' => now()->subHour()]);
+    ProductVariant::factory()->for($live)->create();
+
+    $draft = Product::factory()->draft()->create(['title' => 'Hidden product']);
+    ProductVariant::factory()->for($draft)->create();
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/home')
+            ->has('collections.data', 1)
+            ->where('collections.data.0.title', $collection->title)
+            ->has('newArrivals.data', 1)
+            ->where('newArrivals.data.0.title', 'Cenforce 100 Mg')
         );
 });
 

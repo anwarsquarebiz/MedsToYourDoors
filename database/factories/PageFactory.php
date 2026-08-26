@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PageTemplate;
 use App\Enums\PublishStatus;
 use App\Models\Page;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,6 +26,7 @@ class PageFactory extends Factory
             'excerpt' => fake()->sentence(),
             'content' => '<p>'.fake()->paragraphs(3, true).'</p>',
             'status' => PublishStatus::Published,
+            'template' => PageTemplate::Default,
             'seo_title' => null,
             'seo_description' => null,
             'published_at' => now()->subDay(),
@@ -36,6 +38,13 @@ class PageFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'status' => PublishStatus::Draft,
             'published_at' => null,
+        ]);
+    }
+
+    public function contact(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'template' => PageTemplate::Contact,
         ]);
     }
 }

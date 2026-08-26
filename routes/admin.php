@@ -63,6 +63,7 @@ Route::middleware(['auth', 'verified', 'admin'])
 
         Route::get('navigation', [NavigationItemController::class, 'index'])->name('navigation.index');
         Route::post('navigation', [NavigationItemController::class, 'store'])->name('navigation.store');
+        Route::put('navigation/order', [NavigationItemController::class, 'reorder'])->name('navigation.reorder');
         Route::put('navigation/{navigationItem}', [NavigationItemController::class, 'update'])->name('navigation.update');
         Route::delete('navigation/{navigationItem}', [NavigationItemController::class, 'destroy'])->name('navigation.destroy');
 

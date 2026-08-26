@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Page;
 
+use App\Enums\PageTemplate;
 use App\Enums\PublishStatus;
 use App\Models\Page;
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,6 +23,7 @@ abstract class PageFormRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'status' => ['required', Rule::enum(PublishStatus::class)],
+            'template' => ['required', Rule::enum(PageTemplate::class)],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string', 'max:500'],
             'published_at' => ['nullable', 'date'],

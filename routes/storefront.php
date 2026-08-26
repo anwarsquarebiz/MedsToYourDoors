@@ -9,6 +9,8 @@ use App\Http\Controllers\Storefront\CartCouponController;
 use App\Http\Controllers\Storefront\CartItemController;
 use App\Http\Controllers\Storefront\CheckoutController;
 use App\Http\Controllers\Storefront\CollectionController;
+use App\Http\Controllers\Storefront\ContactController;
+use App\Http\Controllers\Storefront\CurrencyController;
 use App\Http\Controllers\Storefront\HomeController;
 use App\Http\Controllers\Storefront\PageController;
 use App\Http\Controllers\Storefront\ProductController;
@@ -26,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', HomeController::class)->name('home');
+Route::post('currency', CurrencyController::class)->name('currency.update');
 
 Route::get('products', [ProductController::class, 'index'])->name('products.index');
 Route::get('products/{slug}', [ProductController::class, 'show'])->name('products.show');
@@ -34,6 +37,7 @@ Route::get('collections', [CollectionController::class, 'index'])->name('collect
 Route::get('collections/{slug}', [CollectionController::class, 'show'])->name('collections.show');
 
 Route::get('pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+Route::post('pages/{slug}/contact', ContactController::class)->middleware('throttle:5,1')->name('pages.contact');
 
 Route::get('blogs/{blogSlug}', [BlogController::class, 'show'])->name('blogs.show');
 Route::get('blogs/{blogSlug}/{postSlug}', [BlogController::class, 'post'])->name('blogs.posts.show');

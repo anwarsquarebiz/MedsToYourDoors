@@ -39,6 +39,19 @@ export interface StoreInfo {
     social: Record<string, string>;
     logo_url: string | null;
     favicon_url: string | null;
+    free_shipping_threshold: Money;
+}
+
+export interface CurrencyOption {
+    code: string;
+    name: string;
+    symbol: string;
+}
+
+export interface DisplayCurrency {
+    current: string;
+    base: string;
+    options: CurrencyOption[];
 }
 
 export interface FlashMessages {
@@ -77,6 +90,7 @@ export interface SharedData {
     name: string;
     auth: Auth;
     store: StoreInfo;
+    currency: DisplayCurrency;
     flash: FlashMessages;
     navigation?: StorefrontNavigation;
     cart?: CartSummary;
@@ -480,6 +494,7 @@ export interface CmsPage {
     excerpt: string | null;
     content: string | null;
     status: PublishStatus;
+    template: 'default' | 'contact';
     seo_title: string | null;
     seo_description: string | null;
     meta_title: string;

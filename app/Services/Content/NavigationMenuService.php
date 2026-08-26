@@ -4,6 +4,8 @@ namespace App\Services\Content;
 
 use App\Enums\NavigationLinkType;
 use App\Models\NavigationItem;
+use App\Support\CacheKeys;
+use Illuminate\Support\Facades\DB;
 
 class NavigationMenuService
 {
@@ -28,6 +30,39 @@ class NavigationMenuService
     public function delete(NavigationItem $item): void
     {
         $item->delete();
+    }
+
+    /**
+     * Apply a new header order. Unknown ids are ignored; omitted items stay at the end.
+     *
+     * @param  array<int, int>  $orderedIds
+     */
+    public function reorder(array $orderedIds, string $menu = NavigationItem::MenuHeader): void
+    {
+        $existingIds = NavigationItem::query()
+            ->forMenu($menu)
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        $ordered = collect($orderedIds)
+            ->map(fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->filter(fn (int $id): bool => in_array($id, $existingIds, true))
+            ->values();
+
+        $final = $ordered->concat(collect($existingIds)->diff($ordered))->values();
+
+        DB::transaction(function () use ($final, $menu): void {
+            foreach ($final as $index => $id) {
+                NavigationItem::query()
+                    ->where('menu', $menu)
+                    ->whereKey($id)
+                    ->update(['position' => $index + 1]);
+            }
+        });
+
+        CacheKeys::bump(CacheKeys::Navigation);
     }
 
     /**

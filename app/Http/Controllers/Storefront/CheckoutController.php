@@ -13,6 +13,7 @@ use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Checkout\ShippingCalculator;
+use App\Services\Currency\CurrencyConverter;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,7 @@ class CheckoutController extends Controller
         private readonly CheckoutService $checkout,
         private readonly ShippingCalculator $shipping,
         private readonly SettingsService $settings,
+        private readonly CurrencyConverter $converter,
     ) {}
 
     public function show(): Response|RedirectResponse
@@ -54,7 +56,7 @@ class CheckoutController extends Controller
                 'id' => $quote['method']->id,
                 'name' => $quote['method']->name,
                 'description' => $quote['method']->description,
-                'amount' => $quote['amount']->toArray(),
+                'amount' => $this->converter->present($quote['amount']),
             ])->values(),
             'addresses' => $user === null
                 ? []

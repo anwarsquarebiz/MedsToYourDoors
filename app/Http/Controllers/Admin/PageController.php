@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PageTemplate;
 use App\Enums\PublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Page\StorePageRequest;
@@ -42,6 +43,7 @@ class PageController extends Controller
 
         return Inertia::render('admin/pages/create', [
             'statuses' => PublishStatus::options(),
+            'templates' => PageTemplate::options(),
         ]);
     }
 
@@ -60,6 +62,7 @@ class PageController extends Controller
         return Inertia::render('admin/pages/edit', [
             'page' => new PageResource($page),
             'statuses' => PublishStatus::options(),
+            'templates' => PageTemplate::options(),
         ]);
     }
 

@@ -1,4 +1,5 @@
 import { FormCard, FormField } from '@/components/admin/form-field';
+import { RichTextEditor } from '@/components/admin/rich-text-editor';
 import { StatusBadge } from '@/components/admin/status-badge';
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
@@ -64,7 +65,15 @@ export function AdminPagesIndex({ pages, filters }: AdminPagesIndexProps) {
 
 export default AdminPagesIndex;
 
-export function PageEditor({ page, statuses }: { page?: CmsPage; statuses: SelectOption[] }) {
+export function PageEditor({
+    page,
+    statuses,
+    templates,
+}: {
+    page?: CmsPage;
+    statuses: SelectOption[];
+    templates: SelectOption[];
+}) {
     const isEditing = Boolean(page);
     const form = useForm({
         title: page?.title ?? '',
@@ -72,6 +81,7 @@ export function PageEditor({ page, statuses }: { page?: CmsPage; statuses: Selec
         excerpt: page?.excerpt ?? '',
         content: page?.content ?? '',
         status: page?.status ?? 'draft',
+        template: page?.template ?? 'default',
         seo_title: page?.seo_title ?? '',
         seo_description: page?.seo_description ?? '',
     });
@@ -116,12 +126,11 @@ export function PageEditor({ page, statuses }: { page?: CmsPage; statuses: Selec
                             <Input id="excerpt" value={form.data.excerpt} onChange={(event) => form.setData('excerpt', event.target.value)} />
                         </FormField>
                         <FormField label="Content" htmlFor="content" error={form.errors.content}>
-                            <textarea
+                            <RichTextEditor
                                 id="content"
-                                rows={12}
                                 value={form.data.content}
-                                onChange={(event) => form.setData('content', event.target.value)}
-                                className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-700"
+                                onChange={(value) => form.setData('content', value)}
+                                placeholder="Headings, lists, links, and formatted text…"
                             />
                         </FormField>
                     </FormCard>
@@ -138,6 +147,25 @@ export function PageEditor({ page, statuses }: { page?: CmsPage; statuses: Selec
                                 {statuses.map((status) => (
                                     <option key={status.value} value={status.value}>
                                         {status.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </FormField>
+                        <FormField
+                            label="Template"
+                            htmlFor="template"
+                            error={form.errors.template}
+                            hint="Contact pages show a message form under the content, the same way Shopify contact templates work."
+                        >
+                            <select
+                                id="template"
+                                value={form.data.template}
+                                onChange={(event) => form.setData('template', event.target.value as 'default' | 'contact')}
+                                className="h-9 w-full rounded-md border border-neutral-300 bg-transparent px-3 text-sm dark:border-neutral-700"
+                            >
+                                {templates.map((template) => (
+                                    <option key={template.value} value={template.value}>
+                                        {template.label}
                                     </option>
                                 ))}
                             </select>

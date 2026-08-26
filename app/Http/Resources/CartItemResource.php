@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\PresentsDisplayMoney;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -13,6 +14,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class CartItemResource extends JsonResource
 {
+    use PresentsDisplayMoney;
+
     /**
      * @return array<string, mixed>
      */
@@ -25,8 +28,8 @@ class CartItemResource extends JsonResource
         return [
             'id' => $this->id,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unitPrice(),
-            'line_total' => $this->lineTotal(),
+            'unit_price' => $this->displayMoney($this->unitPrice()),
+            'line_total' => $this->displayMoney($this->lineTotal()),
             'max_quantity' => max($this->quantity, $variant->purchasableQuantity()),
             'in_stock' => $variant->canFulfill($this->quantity),
             'variant' => [
