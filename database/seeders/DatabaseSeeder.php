@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
 
         app(SettingsService::class)->setMany([
             'store.name' => 'Meds To Your Doors',
-            'store.email' => 'support@example.com',
+            'store.email' => 'support@medstoyourdoors.com',
             'store.phone' => '1-800-555-0100',
         ], 'store');
 

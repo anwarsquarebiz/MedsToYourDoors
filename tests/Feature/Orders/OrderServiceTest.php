@@ -2,6 +2,8 @@
 
 use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Mail\OrderConfirmationMail;
+use App\Mail\OrderStatusChangedMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -12,6 +14,7 @@ use App\Services\Catalog\InventoryService;
 use App\Services\Orders\OrderService;
 use App\Services\Orders\RefundService;
 use App\Support\Money;
+use Illuminate\Support\Facades\Mail;
 
 it('transitions a paid order through fulfilment', function () {
     $order = Order::factory()->paid()->create();
@@ -72,6 +75,35 @@ it('lets staff update an order status', function () {
         ->assertRedirect();
 
     expect($order->fresh()->status)->toBe(OrderStatus::Processing);
+});
+
+it('queues a confirmation when staff mark a pending order paid', function () {
+    Mail::fake();
+
+    $order = Order::factory()->create();
+    OrderItem::factory()->for($order)->create();
+
+    app(OrderService::class)->transition($order, OrderStatus::Paid);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Paid);
+
+    Mail::assertQueued(OrderConfirmationMail::class, function (OrderConfirmationMail $mail) use ($order): bool {
+        return $mail->hasTo($order->email) && $mail->order->is($order);
+    });
+    Mail::assertNotQueued(OrderStatusChangedMail::class);
+});
+
+it('queues a status change mail when a paid order moves to processing', function () {
+    Mail::fake();
+
+    $order = Order::factory()->paid()->create();
+
+    app(OrderService::class)->transition($order, OrderStatus::Processing);
+
+    Mail::assertQueued(OrderStatusChangedMail::class, function (OrderStatusChangedMail $mail) use ($order): bool {
+        return $mail->hasTo($order->email) && $mail->order->is($order);
+    });
+    Mail::assertNotQueued(OrderConfirmationMail::class);
 });
 
 it('releases inventory when an order is cancelled', function () {

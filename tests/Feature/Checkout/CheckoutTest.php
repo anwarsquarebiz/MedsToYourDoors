@@ -3,6 +3,7 @@
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Exceptions\CheckoutException;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,6 +12,8 @@ use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Services\Checkout\CheckoutService;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 /**
  * @return array<string, mixed>
@@ -65,6 +68,8 @@ it('places an order, reserves stock and starts a fake payment', function () {
 });
 
 it('marks the order paid when the webhook arrives and ignores duplicates', function () {
+    Mail::fake();
+
     [$cart] = stockedCart();
     ShippingMethod::factory()->create();
 
@@ -79,6 +84,10 @@ it('marks the order paid when the webhook arrives and ignores duplicates', funct
     expect($order->fresh()->status)->toBe(OrderStatus::Paid)
         ->and($payment->fresh()->status)->toBe(PaymentStatus::Paid);
 
+    Mail::assertQueued(OrderConfirmationMail::class, function (OrderConfirmationMail $mail) use ($order): bool {
+        return $mail->hasTo($order->email) && $mail->order->is($order);
+    });
+
     $eventCount = $order->fresh()->statusEvents()->count();
 
     $this->postJson('/webhooks/payments/fake', $payload, ['X-Api-Key' => 'testing-webhook-key'])
@@ -86,6 +95,8 @@ it('marks the order paid when the webhook arrives and ignores duplicates', funct
 
     expect($order->fresh()->statusEvents()->count())->toBe($eventCount)
         ->and($order->fresh()->status)->toBe(OrderStatus::Paid);
+
+    Mail::assertQueued(OrderConfirmationMail::class, 1);
 });
 
 it('rejects a webhook without the api key', function () {
@@ -107,6 +118,16 @@ it('lets a customer see their own order and forbids someone else', function () {
         ->assertInertia(fn ($page) => $page->component('storefront/account/orders/show'));
 
     $this->actingAs($stranger)->get("/account/orders/{$order->id}")->assertForbidden();
+});
+
+it('lets a guest view the complete page with a signed confirmation link', function () {
+    $order = Order::factory()->guest()->create();
+
+    $this->get(route('checkout.complete', $order))->assertForbidden();
+
+    $this->get(URL::signedRoute('checkout.complete', $order))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('storefront/checkout-complete'));
 });
 
 it('posts checkout over HTTP and redirects to the complete page', function () {

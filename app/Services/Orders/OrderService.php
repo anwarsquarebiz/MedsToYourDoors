@@ -4,6 +4,7 @@ namespace App\Services\Orders;
 
 use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Mail\OrderConfirmationMail;
 use App\Mail\OrderStatusChangedMail;
 use App\Models\Order;
 use App\Models\User;
@@ -32,7 +33,13 @@ class OrderService
             $order->syncOriginal();
         });
 
-        Mail::to($order->email)->queue(new OrderStatusChangedMail($order->fresh(['items']) ?? $order));
+        $fresh = $order->fresh(['items']) ?? $order;
+
+        if ($status === OrderStatus::Paid) {
+            Mail::to($order->email)->queue(new OrderConfirmationMail($fresh));
+        } else {
+            Mail::to($order->email)->queue(new OrderStatusChangedMail($fresh));
+        }
 
         return $order->refresh();
     }

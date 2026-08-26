@@ -70,4 +70,32 @@ class OrderItem extends Model
     {
         return $this->total_amount ?? Money::zero();
     }
+
+    public function displayVariantTitle(): ?string
+    {
+        $title = trim((string) $this->variant_title);
+
+        if ($title === '' || in_array($title, ['Default', 'Default Title'], true)) {
+            return null;
+        }
+
+        return $title;
+    }
+
+    public function imageUrl(): ?string
+    {
+        $image = $this->variant?->images->first() ?? $this->product?->images->first();
+
+        if ($image === null) {
+            return null;
+        }
+
+        $url = $image->url();
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+
+        return url($url);
+    }
 }

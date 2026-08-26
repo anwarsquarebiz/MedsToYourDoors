@@ -143,6 +143,10 @@ class CheckoutController extends Controller
 
     private function assertVisible(Order $order): void
     {
+        if (request()->hasValidSignature()) {
+            return;
+        }
+
         $user = request()->user();
 
         if ($user?->isAdmin()) {

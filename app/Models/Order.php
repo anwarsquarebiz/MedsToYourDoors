@@ -174,18 +174,41 @@ class Order extends Model
         ]);
     }
 
-    public function shippingOneLine(): string
+    public function customerFirstName(): ?string
     {
-        $address = $this->shipping_address ?? [];
+        $first = trim((string) ($this->shipping_address['first_name'] ?? ''));
+
+        return $first === '' ? null : $first;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $address
+     * @return list<string>
+     */
+    public function addressLines(?array $address): array
+    {
+        if ($address === null || $address === []) {
+            return [];
+        }
+
+        $name = trim(($address['first_name'] ?? '').' '.($address['last_name'] ?? ''));
+        $locality = collect([
+            $address['city'] ?? null,
+            trim(($address['province'] ?? '').' '.($address['postal_code'] ?? '')),
+        ])->map(fn (mixed $part): string => trim((string) $part))->filter()->implode(', ');
 
         return collect([
-            trim(($address['first_name'] ?? '').' '.($address['last_name'] ?? '')),
+            $name !== '' ? $name : null,
             $address['address_line1'] ?? null,
-            $address['city'] ?? null,
-            $address['province'] ?? null,
-            $address['postal_code'] ?? null,
+            $address['address_line2'] ?? null,
+            $locality !== '' ? $locality : null,
             $address['country_code'] ?? null,
-        ])->filter()->implode(', ');
+        ])->map(fn (mixed $line): string => trim((string) $line))->filter()->values()->all();
+    }
+
+    public function shippingOneLine(): string
+    {
+        return implode(', ', $this->addressLines($this->shipping_address));
     }
 
     /**

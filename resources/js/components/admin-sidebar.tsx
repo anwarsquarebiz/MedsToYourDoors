@@ -68,7 +68,7 @@ export function AdminSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/admin" prefetch>
-                                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg">
+                                <div className="text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg">
                                     <StoreLogo
                                         imageClassName="h-full w-full object-contain"
                                         fallbackClassName="size-4 fill-current text-sidebar-primary-foreground"

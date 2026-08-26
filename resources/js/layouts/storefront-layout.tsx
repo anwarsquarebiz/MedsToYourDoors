@@ -52,7 +52,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </Sheet>
 
                     <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-                        <span className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
+                        <span className="flex size-8 items-center justify-center overflow-hidden rounded-lg text-white">
                             <StoreLogo
                                 imageClassName="h-full w-full object-contain"
                                 fallbackClassName="size-4 fill-current text-white dark:text-neutral-900"
