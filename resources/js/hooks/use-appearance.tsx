@@ -14,7 +14,7 @@ const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 const handleSystemThemeChange = () => {
     const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'system');
+    applyTheme(currentAppearance || 'light');
 };
 
 export function initializeTheme() {
