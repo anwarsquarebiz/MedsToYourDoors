@@ -117,7 +117,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         </p>
                     </div>
 
-                    <div className="space-y-3">
+                    {/* <div className="space-y-3">
                         <p className="text-sm font-semibold">Shop</p>
                         <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
                             <li>
@@ -133,18 +133,33 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </div> */}
 
                     <div className="space-y-3">
                         <p className="text-sm font-semibold">Information</p>
                         <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
-                            {pages.map((page) => (
+                            {/* {pages.map((page) => (
                                 <li key={page.url}>
                                     <Link href={page.url} className="hover:text-primary">
                                         {page.title}
                                     </Link>
                                 </li>
-                            ))}
+                            ))} */}
+                            <li>
+                                <Link href="/pages/return-reship-policy" className="hover:text-primary">
+                                    Return & Reship Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/pages/faqs" className="hover:text-primary">
+                                    FAQs
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/pages/contact-us" className="hover:text-primary">
+                                    Contact Us
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 

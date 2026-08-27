@@ -233,7 +233,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                 </div>
             </section>
 
-            {collections.data.length > 0 && (
+            {/* {collections.data.length > 0 && (
                 <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-16 sm:px-6">
                     <div className="flex items-baseline justify-between gap-4">
                         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -265,7 +265,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                         ))}
                     </div>
                 </section>
-            )}
+            )} */}
 
             <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
                 <div className="bg-accent flex flex-col gap-6 rounded-3xl p-8 md:flex-row md:items-center md:justify-between lg:p-12">
