@@ -19,6 +19,7 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'order_number' => $this->order_number,
+            'customer_name' => $this->customerDisplayName(),
             'email' => $this->email,
             'phone' => $this->phone,
             'status' => $this->status->value,
@@ -35,6 +36,8 @@ class OrderResource extends JsonResource
             'coupon_code' => $this->coupon_code,
             'shipping_address' => $this->shipping_address,
             'billing_address' => $this->billing_address,
+            'shipping_address_lines' => $this->addressLines($this->shipping_address),
+            'billing_address_lines' => $this->addressLines($this->billing_address),
             'shipping_method_name' => $this->shipping_method_name,
             'customer_note' => $this->customer_note,
             'staff_note' => $this->staff_note,

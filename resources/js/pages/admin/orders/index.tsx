@@ -74,7 +74,10 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: AdminOrd
                                         {order.order_number}
                                     </Link>
                                 </td>
-                                <td className="px-4 py-3">{order.email}</td>
+                                <td className="px-4 py-3">
+                                    <p>{order.customer_name ?? order.email}</p>
+                                    {order.customer_name && <p className="text-muted-foreground text-xs">{order.email}</p>}
+                                </td>
                                 <td className="px-4 py-3">
                                     <StatusBadge label={order.status_label} tone={order.status_tone} />
                                 </td>

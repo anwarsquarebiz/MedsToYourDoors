@@ -66,6 +66,30 @@ it('lists orders for staff and forbids customers', function () {
     $this->actingAs($customer)->get('/admin/orders')->assertForbidden();
 });
 
+it('shows checkout contact and address details on the admin order page', function () {
+    $order = Order::factory()->create([
+        'email' => 'ada@example.com',
+        'phone' => '07000000000',
+        'customer_note' => 'Please leave at the reception.',
+        'shipping_method_name' => 'Standard shipping',
+    ]);
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)->get("/admin/orders/{$order->id}")
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/orders/show')
+            ->where('order.data.email', 'ada@example.com')
+            ->where('order.data.phone', '07000000000')
+            ->where('order.data.customer_name', 'Ada Lovelace')
+            ->where('order.data.customer_note', 'Please leave at the reception.')
+            ->where('order.data.shipping_method_name', 'Standard shipping')
+            ->where('order.data.shipping_address.address_line1', '1 Computing Lane')
+            ->where('order.data.shipping_address_lines.0', 'Ada Lovelace')
+            ->where('order.data.billing_address.city', 'London')
+        );
+});
+
 it('lets staff update an order status', function () {
     $order = Order::factory()->paid()->create();
     $admin = User::factory()->admin()->create();

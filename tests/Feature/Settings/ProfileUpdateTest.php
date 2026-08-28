@@ -12,6 +12,14 @@ test('profile page is displayed', function () {
     $response->assertOk();
 });
 
+test('appearance settings redirect to the profile page', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get('/settings/appearance')
+        ->assertRedirect('/settings/profile');
+});
+
 test('admin profile page shares admin identity for the app sidebar', function () {
     $admin = User::factory()->admin()->create();
 

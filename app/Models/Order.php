@@ -181,6 +181,19 @@ class Order extends Model
         return $first === '' ? null : $first;
     }
 
+    public function customerDisplayName(): ?string
+    {
+        $fromAddress = trim(($this->shipping_address['first_name'] ?? '').' '.($this->shipping_address['last_name'] ?? ''));
+
+        if ($fromAddress !== '') {
+            return $fromAddress;
+        }
+
+        $fromUser = trim((string) ($this->user?->name ?? ''));
+
+        return $fromUser === '' ? null : $fromUser;
+    }
+
     /**
      * @param  array<string, mixed>|null  $address
      * @return list<string>
@@ -199,6 +212,7 @@ class Order extends Model
 
         return collect([
             $name !== '' ? $name : null,
+            $address['company'] ?? null,
             $address['address_line1'] ?? null,
             $address['address_line2'] ?? null,
             $locality !== '' ? $locality : null,

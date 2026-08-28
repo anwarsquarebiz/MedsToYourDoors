@@ -3,11 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin-layout';
 import { type BreadcrumbItem, type OrderDetail } from '@/types';
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { type FormEventHandler } from 'react';
 
 interface AdminOrderShowProps {
     order: { data: OrderDetail };
+}
+
+function addressesMatch(left: Record<string, string | null> | null, right: Record<string, string | null> | null): boolean {
+    return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
 export default function AdminOrderShow({ order }: AdminOrderShowProps) {
@@ -17,6 +21,7 @@ export default function AdminOrderShow({ order }: AdminOrderShowProps) {
         { title: 'Orders', href: '/admin/orders' },
         { title: item.order_number, href: `/admin/orders/${item.id}` },
     ];
+    const billingSameAsShipping = addressesMatch(item.shipping_address, item.billing_address);
 
     const statusForm = useForm({ status: item.allowed_transitions[0]?.value ?? item.status, note: '' });
     const refundForm = useForm({ amount: item.refundable.decimal, reason: '', restock: false });
@@ -44,7 +49,8 @@ export default function AdminOrderShow({ order }: AdminOrderShowProps) {
                             {(item.items ?? []).map((line) => (
                                 <li key={line.id} className="flex justify-between">
                                     <span>
-                                        {line.product_title} × {line.quantity}
+                                        {line.product_title}
+                                        {line.variant_title ? ` · ${line.variant_title}` : ''} × {line.quantity}
                                     </span>
                                     <span>{line.total.formatted}</span>
                                 </li>
@@ -55,16 +61,53 @@ export default function AdminOrderShow({ order }: AdminOrderShowProps) {
                                 <dt>Subtotal</dt>
                                 <dd>{item.subtotal.formatted}</dd>
                             </div>
+                            {item.discount.amount > 0 && (
+                                <div className="flex justify-between text-emerald-600">
+                                    <dt>{item.coupon_code ? `Discount (${item.coupon_code})` : 'Discount'}</dt>
+                                    <dd>-{item.discount.formatted}</dd>
+                                </div>
+                            )}
                             <div className="flex justify-between">
-                                <dt>Shipping</dt>
+                                <dt>Shipping{item.shipping_method_name ? ` · ${item.shipping_method_name}` : ''}</dt>
                                 <dd>{item.shipping.formatted}</dd>
                             </div>
+                            {item.tax.amount > 0 && (
+                                <div className="flex justify-between">
+                                    <dt>Tax</dt>
+                                    <dd>{item.tax.formatted}</dd>
+                                </div>
+                            )}
                             <div className="flex justify-between font-semibold">
                                 <dt>Total</dt>
                                 <dd>{item.grand_total.formatted}</dd>
                             </div>
+                            {item.refunded.amount > 0 && (
+                                <div className="flex justify-between text-neutral-500">
+                                    <dt>Refunded</dt>
+                                    <dd>-{item.refunded.formatted}</dd>
+                                </div>
+                            )}
                         </dl>
                     </section>
+
+                    {(item.payments ?? []).length > 0 && (
+                        <section className="rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">
+                            <h2 className="font-medium">Payments</h2>
+                            <ul className="mt-3 space-y-2 text-sm">
+                                {(item.payments ?? []).map((payment) => (
+                                    <li key={payment.id} className="flex justify-between gap-4">
+                                        <span>
+                                            {payment.status_label}
+                                            {payment.gateway ? ` · ${payment.gateway}` : ''}
+                                            {payment.paid_at ? ` · ${payment.paid_at}` : ''}
+                                            {payment.failure_reason ? ` — ${payment.failure_reason}` : ''}
+                                        </span>
+                                        <span>{payment.amount.formatted}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
 
                     <section className="rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">
                         <h2 className="font-medium">Timeline</h2>
@@ -81,6 +124,72 @@ export default function AdminOrderShow({ order }: AdminOrderShowProps) {
                 </div>
 
                 <div className="space-y-6">
+                    <section className="space-y-4 rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">
+                        <h2 className="font-medium">Customer</h2>
+                        <dl className="space-y-3 text-sm">
+                            <div>
+                                <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Contact</dt>
+                                <dd className="mt-1 space-y-0.5">
+                                    {item.customer ? (
+                                        <Link href={`/admin/customers/${item.customer.id}`} className="font-medium hover:underline">
+                                            {item.customer_name ?? item.customer.name}
+                                        </Link>
+                                    ) : (
+                                        item.customer_name && <p className="font-medium">{item.customer_name}</p>
+                                    )}
+                                    <p>{item.email}</p>
+                                    {item.phone && <p>{item.phone}</p>}
+                                    {!item.customer && <p className="text-muted-foreground text-xs">Guest checkout</p>}
+                                </dd>
+                            </div>
+
+                            {item.shipping_address_lines.length > 0 && (
+                                <div>
+                                    <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Shipping address</dt>
+                                    <dd className="mt-1 whitespace-pre-line">
+                                        {item.shipping_address_lines.join('\n')}
+                                        {item.shipping_address?.phone && item.shipping_address.phone !== item.phone && (
+                                            <>
+                                                {'\n'}
+                                                {item.shipping_address.phone}
+                                            </>
+                                        )}
+                                    </dd>
+                                </div>
+                            )}
+
+                            {(item.billing_address_lines.length > 0 || billingSameAsShipping) && (
+                                <div>
+                                    <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Billing address</dt>
+                                    <dd className="mt-1 whitespace-pre-line">
+                                        {billingSameAsShipping ? 'Same as shipping address' : item.billing_address_lines.join('\n')}
+                                    </dd>
+                                </div>
+                            )}
+
+                            {item.shipping_method_name && (
+                                <div>
+                                    <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Shipping method</dt>
+                                    <dd className="mt-1">{item.shipping_method_name}</dd>
+                                </div>
+                            )}
+
+                            {item.customer_note && (
+                                <div>
+                                    <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Customer note</dt>
+                                    <dd className="mt-1 whitespace-pre-line">{item.customer_note}</dd>
+                                </div>
+                            )}
+
+                            {item.placed_at && (
+                                <div>
+                                    <dt className="text-muted-foreground text-xs font-medium tracking-wide uppercase">Placed</dt>
+                                    <dd className="mt-1">{item.placed_at}</dd>
+                                </div>
+                            )}
+                        </dl>
+                    </section>
+
                     {item.allowed_transitions.length > 0 && (
                         <form onSubmit={updateStatus} className="space-y-3 rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">
                             <h2 className="font-medium">Update status</h2>

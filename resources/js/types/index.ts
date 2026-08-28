@@ -456,6 +456,7 @@ export interface RefundRow {
 export interface OrderDetail {
     id: number;
     order_number: string;
+    customer_name: string | null;
     email: string;
     phone: string | null;
     status: string;
@@ -472,6 +473,8 @@ export interface OrderDetail {
     coupon_code: string | null;
     shipping_address: Record<string, string | null> | null;
     billing_address: Record<string, string | null> | null;
+    shipping_address_lines: string[];
+    billing_address_lines: string[];
     shipping_method_name: string | null;
     customer_note: string | null;
     staff_note: string | null;
