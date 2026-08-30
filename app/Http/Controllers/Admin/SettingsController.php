@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateBrandingSettingsRequest;
 use App\Http\Requests\Admin\Settings\UpdateStoreSettingsRequest;
+use App\Services\Ads\MetaAdsSettings;
 use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class SettingsController extends Controller
     public function __construct(
         private readonly SettingsService $settings,
         private readonly BrandingService $branding,
+        private readonly MetaAdsSettings $metaAds,
     ) {}
 
     public function edit(): Response
@@ -23,7 +25,8 @@ class SettingsController extends Controller
         abort_unless(request()->user()?->isAdmin(), 403);
 
         return Inertia::render('admin/settings/edit', [
-            'settings' => $this->settings->all(),
+            'settings' => $this->settings->all()->except(['ads.meta.access_token']),
+            'meta_ads' => $this->metaAds->adminPayload(),
             'branding' => [
                 'logo_url' => $this->branding->logoUrl(),
                 'favicon_url' => $this->branding->faviconUrl(),
@@ -57,6 +60,10 @@ class SettingsController extends Controller
             'social.instagram' => $data['social']['instagram'] ?? '',
             'social.twitter' => $data['social']['twitter'] ?? '',
         ], 'social');
+
+        if (array_key_exists('ads', $data)) {
+            $this->metaAds->update($data['ads']);
+        }
 
         return back()->with('success', 'Settings saved.');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\CartItemResource;
+use App\Services\Ads\MetaAdsSettings;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
 use App\Services\Currency\CurrencyConverter;
@@ -34,6 +35,7 @@ class HandleInertiaRequests extends Middleware
         private readonly CartService $carts,
         private readonly CurrencyService $currencies,
         private readonly CurrencyConverter $converter,
+        private readonly MetaAdsSettings $metaAds,
     ) {}
 
     /**
@@ -104,6 +106,9 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
                 'open_cart' => (bool) $request->session()->get('open_cart'),
             ],
+            'meta_pixel' => fn (): ?array => $request->routeIs('admin.*')
+                ? null
+                : $this->metaAds->publicPixel(),
         ];
     }
 

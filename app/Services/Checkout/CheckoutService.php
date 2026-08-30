@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ShippingMethod;
 use App\Models\User;
+use App\Services\Ads\MetaAttribution;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
 use App\Services\Cart\CouponService;
@@ -54,6 +55,7 @@ class CheckoutService
         private readonly OrderNumberGenerator $numbers,
         private readonly PaymentGatewayManager $gateways,
         private readonly SettingsService $settings,
+        private readonly MetaAttribution $attribution,
     ) {}
 
     /**
@@ -107,6 +109,7 @@ class CheckoutService
                 'billing_address' => $billingAddress,
                 'shipping_method_name' => $method->name,
                 'customer_note' => $payload['customer_note'] ?? null,
+                'ads_attribution' => $this->attribution->capture(),
                 'placed_at' => now(),
             ]);
 

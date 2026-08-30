@@ -4,53 +4,13 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Exceptions\CheckoutException;
 use App\Mail\OrderConfirmationMail;
-use App\Models\Cart;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Services\Checkout\CheckoutService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
-
-/**
- * @return array<string, mixed>
- */
-function checkoutPayload(array $overrides = []): array
-{
-    $method = ShippingMethod::query()->first() ?? ShippingMethod::factory()->create();
-
-    return array_merge([
-        'email' => 'buyer@example.com',
-        'phone' => '5550100',
-        'shipping_method_id' => $method->id,
-        'billing_same_as_shipping' => true,
-        'save_address' => false,
-        'shipping' => [
-            'first_name' => 'Ada',
-            'last_name' => 'Lovelace',
-            'address_line1' => '1 Computing Lane',
-            'city' => 'London',
-            'postal_code' => 'SW1A 1AA',
-            'country_code' => 'GB',
-        ],
-    ], $overrides);
-}
-
-function stockedCart(int $price = 4000, int $quantity = 1, int $stock = 10): array
-{
-    $variant = ProductVariant::factory()->for(Product::factory())->priced($price)->withStock($stock)->create();
-    $cart = Cart::factory()->create();
-    $cart->items()->create([
-        'product_variant_id' => $variant->id,
-        'quantity' => $quantity,
-        'unit_price_amount' => $variant->price(),
-    ]);
-
-    return [$cart->load(['items.variant.product', 'coupon', 'user']), $variant];
-}
 
 it('places an order, reserves stock and starts a fake payment', function () {
     [$cart, $variant] = stockedCart(4000, 2, 5);
@@ -127,7 +87,11 @@ it('lets a guest view the complete page with a signed confirmation link', functi
 
     $this->get(URL::signedRoute('checkout.complete', $order))
         ->assertOk()
-        ->assertInertia(fn ($page) => $page->component('storefront/checkout-complete'));
+        ->assertInertia(fn ($page) => $page
+            ->component('storefront/checkout-complete')
+            ->where('order.data.is_paid', false)
+            ->where('order.data.meta_event_id', null)
+        );
 });
 
 it('posts checkout over HTTP and redirects to the complete page', function () {

@@ -39,6 +39,7 @@ class Order extends Model
         'shipping_method_name',
         'customer_note',
         'staff_note',
+        'ads_attribution',
         'placed_at',
         'cancelled_at',
     ];
@@ -58,6 +59,7 @@ class Order extends Model
             'refunded_amount' => MoneyCast::class,
             'shipping_address' => 'array',
             'billing_address' => 'array',
+            'ads_attribution' => 'array',
             'placed_at' => 'datetime',
             'cancelled_at' => 'datetime',
         ];

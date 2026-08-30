@@ -4,6 +4,7 @@ namespace App\Services\Payments;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Jobs\SendMetaPurchaseConversion;
 use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Payment;
@@ -78,6 +79,7 @@ class PaymentProcessor
             if ($status === PaymentStatus::Paid && $order->status === OrderStatus::Pending) {
                 $order->transitionTo(OrderStatus::Paid, note: 'Payment captured.');
                 Mail::to($order->email)->queue(new OrderConfirmationMail($order->load('items')));
+                SendMetaPurchaseConversion::dispatch($order->id);
             }
 
             if (in_array($status, [PaymentStatus::Failed, PaymentStatus::Cancelled], true) && $order->status === OrderStatus::Pending) {

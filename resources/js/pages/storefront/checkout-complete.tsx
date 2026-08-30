@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { moneyValue, trackMetaEvent } from '@/lib/meta-pixel';
 import { type OrderDetail, type SeoMeta } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle2 } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface CheckoutCompleteProps {
     order: { data: OrderDetail };
@@ -11,6 +13,35 @@ interface CheckoutCompleteProps {
 
 export default function CheckoutComplete({ order, seo }: CheckoutCompleteProps) {
     const item = order.data;
+    const tracked = useRef(false);
+
+    useEffect(() => {
+        if (tracked.current || !item.is_paid || !item.meta_event_id) {
+            return;
+        }
+
+        tracked.current = true;
+
+        const lines = item.items ?? [];
+
+        trackMetaEvent(
+            'Purchase',
+            {
+                content_ids: lines.map((line) => String(line.product_variant_id ?? line.product_id ?? line.id)),
+                content_type: 'product',
+                value: moneyValue(item.grand_total.decimal),
+                currency: item.currency,
+                num_items: lines.reduce((sum, line) => sum + line.quantity, 0),
+                contents: lines.map((line) => ({
+                    id: String(line.product_variant_id ?? line.product_id ?? line.id),
+                    quantity: line.quantity,
+                    item_price: moneyValue(line.unit_price.decimal),
+                })),
+                order_id: item.order_number,
+            },
+            item.meta_event_id,
+        );
+    }, [item]);
 
     return (
         <StorefrontLayout>

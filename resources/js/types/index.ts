@@ -42,6 +42,11 @@ export interface StoreInfo {
     free_shipping_threshold: Money;
 }
 
+export interface MetaPixelConfig {
+    enabled: boolean;
+    pixel_id: string;
+}
+
 export interface CurrencyOption {
     code: string;
     name: string;
@@ -94,6 +99,7 @@ export interface SharedData {
     flash: FlashMessages;
     navigation?: StorefrontNavigation;
     cart?: CartSummary;
+    meta_pixel?: MetaPixelConfig | null;
     quote?: { message: string; author: string };
     [key: string]: unknown;
 }
@@ -413,6 +419,8 @@ export interface AddressRecord {
 
 export interface OrderItemRow {
     id: number;
+    product_id: number | null;
+    product_variant_id: number | null;
     product_title: string;
     variant_title: string | null;
     sku: string | null;
@@ -488,6 +496,8 @@ export interface OrderDetail {
     items_count?: number;
     allowed_transitions: { value: string; label: string }[];
     is_refundable: boolean;
+    is_paid: boolean;
+    meta_event_id?: string | null;
 }
 
 export interface CmsPage {

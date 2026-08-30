@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Cart;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\ShippingMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -51,7 +55,43 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function checkoutPayload(array $overrides = []): array
 {
-    // ..
+    $method = ShippingMethod::query()->first() ?? ShippingMethod::factory()->create();
+
+    return array_merge([
+        'email' => 'buyer@example.com',
+        'phone' => '5550100',
+        'shipping_method_id' => $method->id,
+        'billing_same_as_shipping' => true,
+        'save_address' => false,
+        'shipping' => [
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'address_line1' => '1 Computing Lane',
+            'city' => 'London',
+            'postal_code' => 'SW1A 1AA',
+            'country_code' => 'GB',
+        ],
+    ], $overrides);
+}
+
+/**
+ * @return array{0: Cart, 1: ProductVariant}
+ */
+function stockedCart(int $price = 4000, int $quantity = 1, int $stock = 10): array
+{
+    $variant = ProductVariant::factory()->for(Product::factory())->priced($price)->withStock($stock)->create();
+    $cart = Cart::factory()->create();
+    $cart->items()->create([
+        'product_variant_id' => $variant->id,
+        'quantity' => $quantity,
+        'unit_price_amount' => $variant->price(),
+    ]);
+
+    return [$cart->load(['items.variant.product', 'coupon', 'user']), $variant];
 }

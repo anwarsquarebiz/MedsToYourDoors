@@ -28,6 +28,11 @@ class UpdateStoreSettingsRequest extends FormRequest
             'social.facebook' => ['nullable', 'string', 'max:255'],
             'social.instagram' => ['nullable', 'string', 'max:255'],
             'social.twitter' => ['nullable', 'string', 'max:255'],
+            'ads.enabled' => ['boolean'],
+            'ads.pixel_id' => ['nullable', 'string', 'max:32', 'regex:/^\d*$/'],
+            'ads.access_token' => ['nullable', 'string', 'max:512'],
+            'ads.test_event_code' => ['nullable', 'string', 'max:64'],
+            'ads.advanced_matching' => ['boolean'],
         ];
     }
 }

@@ -2,6 +2,7 @@ import InputError from '@/components/input-error';
 import { ProductDetailsContent } from '@/components/storefront/product-details-content';
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { moneyValue, newMetaEventId, trackMetaEvent } from '@/lib/meta-pixel';
 import { type Money, type ProductDetail, type ProductOption, type ProductVariant, type SeoMeta } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
@@ -249,13 +250,47 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
         quantity: 1,
     });
 
+    useEffect(() => {
+        if (!activeVariant) {
+            return;
+        }
+
+        trackMetaEvent(
+            'ViewContent',
+            {
+                content_ids: [String(activeVariant.id)],
+                content_type: 'product',
+                content_name: item.title,
+                value: moneyValue(activeVariant.price.decimal),
+                currency: activeVariant.price.currency,
+            },
+            newMetaEventId(),
+        );
+    }, [item.id, item.title, activeVariant]);
+
     const addToCart = () => {
         if (!activeVariant?.in_stock) {
             return;
         }
 
         form.transform(() => ({ product_variant_id: activeVariant.id, quantity }));
-        form.post('/cart/items', { preserveScroll: true });
+        form.post('/cart/items', {
+            preserveScroll: true,
+            onSuccess: () => {
+                trackMetaEvent(
+                    'AddToCart',
+                    {
+                        content_ids: [String(activeVariant.id)],
+                        content_type: 'product',
+                        content_name: item.title,
+                        value: moneyValue(activeVariant.price.decimal) * quantity,
+                        currency: activeVariant.price.currency,
+                        contents: [{ id: String(activeVariant.id), quantity, item_price: moneyValue(activeVariant.price.decimal) }],
+                    },
+                    newMetaEventId(),
+                );
+            },
+        });
     };
 
     const submit: FormEventHandler = (event) => {

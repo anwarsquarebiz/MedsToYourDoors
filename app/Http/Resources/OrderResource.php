@@ -58,6 +58,8 @@ class OrderResource extends JsonResource
                 $this->status->allowedTransitions(),
             ),
             'is_refundable' => $this->status->isRefundable() && $this->refundableAmount()->isPositive(),
+            'is_paid' => $this->status->isPaid(),
+            'meta_event_id' => is_array($this->ads_attribution) ? ($this->ads_attribution['event_id'] ?? null) : null,
         ];
     }
 }

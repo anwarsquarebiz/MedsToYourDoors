@@ -2,9 +2,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import StorefrontLayout from '@/layouts/storefront-layout';
-import { type AddressRecord, type CartDetail, type SeoMeta, type ShippingQuote, type SharedData } from '@/types';
+import { moneyValue, newMetaEventId, trackMetaEvent } from '@/lib/meta-pixel';
+import { type AddressRecord, type CartDetail, type SeoMeta, type SharedData, type ShippingQuote } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { type FormEventHandler } from 'react';
+import { type FormEventHandler, useEffect } from 'react';
 
 interface CheckoutPageProps {
     cart: { data: CartDetail };
@@ -74,6 +75,28 @@ export default function CheckoutPage({
     const shippingAmount = selectedShipping?.amount.amount ?? 0;
     const taxAmount = Math.round(((merchandise + shippingAmount) * tax_rate_basis_points) / 10000);
     const grandTotal = merchandise + shippingAmount + taxAmount;
+
+    useEffect(() => {
+        const contentIds = cart.data.items.map((line) => String(line.variant.id));
+        const value = cart.data.totals.total.decimal;
+
+        trackMetaEvent(
+            'InitiateCheckout',
+            {
+                content_ids: contentIds,
+                content_type: 'product',
+                value: moneyValue(value),
+                currency: cart.data.currency,
+                num_items: cart.data.totals.item_count,
+                contents: cart.data.items.map((line) => ({
+                    id: String(line.variant.id),
+                    quantity: line.quantity,
+                    item_price: moneyValue(line.unit_price.decimal),
+                })),
+            },
+            newMetaEventId(),
+        );
+    }, [cart.data.id, cart.data.currency, cart.data.items, cart.data.totals.item_count, cart.data.totals.total.decimal]);
 
     const format = (amount: number) =>
         new Intl.NumberFormat('en-US', { style: 'currency', currency: cart.data.currency }).format(amount / 100);

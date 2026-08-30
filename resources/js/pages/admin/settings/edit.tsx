@@ -7,8 +7,17 @@ import { type BreadcrumbItem } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { type FormEventHandler } from 'react';
 
+interface MetaAdsProps {
+    enabled: boolean;
+    pixel_id: string;
+    test_event_code: string;
+    advanced_matching: boolean;
+    has_access_token: boolean;
+}
+
 interface AdminSettingsProps {
     settings: Record<string, unknown>;
+    meta_ads: MetaAdsProps;
     branding: {
         logo_url: string | null;
         favicon_url: string | null;
@@ -17,7 +26,7 @@ interface AdminSettingsProps {
 
 const str = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
-export default function AdminSettings({ settings, branding }: AdminSettingsProps) {
+export default function AdminSettings({ settings, meta_ads, branding }: AdminSettingsProps) {
     const form = useForm({
         store: {
             name: str(settings['store.name']),
@@ -38,6 +47,13 @@ export default function AdminSettings({ settings, branding }: AdminSettingsProps
             instagram: str(settings['social.instagram']),
             twitter: str(settings['social.twitter']),
         },
+        ads: {
+            enabled: Boolean(meta_ads.enabled),
+            pixel_id: meta_ads.pixel_id,
+            access_token: '',
+            test_event_code: meta_ads.test_event_code,
+            advanced_matching: Boolean(meta_ads.advanced_matching),
+        },
     });
 
     const submit: FormEventHandler = (event) => {
@@ -45,13 +61,15 @@ export default function AdminSettings({ settings, branding }: AdminSettingsProps
         form.put('/admin/settings');
     };
 
+    const adsError = (field: string): string | undefined => form.errors[`ads.${field}`];
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/admin' },
         { title: 'Settings', href: '/admin/settings' },
     ];
 
     return (
-        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store details, branding, checkout and SEO.">
+        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store details, branding, checkout, SEO and Meta ads.">
             <form onSubmit={submit} className="grid gap-6 lg:grid-cols-2">
                 <FormCard title="Store">
                     <FormField label="Name" htmlFor="store_name">
@@ -99,6 +117,70 @@ export default function AdminSettings({ settings, branding }: AdminSettingsProps
                             onChange={(event) => form.setData('seo', { ...form.data.seo, default_description: event.target.value })}
                         />
                     </FormField>
+                </FormCard>
+                <FormCard
+                    title="Meta ads"
+                    description="Facebook and Instagram Pixel plus Conversions API. Ad spend is billed in Meta Ads Manager, not here."
+                >
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={form.data.ads.enabled}
+                            onChange={(event) => form.setData('ads', { ...form.data.ads, enabled: event.target.checked })}
+                        />
+                        Enable Meta Pixel
+                    </label>
+                    <FormField
+                        label="Pixel ID"
+                        htmlFor="ads_pixel_id"
+                        error={adsError('pixel_id')}
+                        hint="The numeric Pixel / Dataset ID from Meta Events Manager."
+                    >
+                        <Input
+                            id="ads_pixel_id"
+                            inputMode="numeric"
+                            value={form.data.ads.pixel_id}
+                            onChange={(event) => form.setData('ads', { ...form.data.ads, pixel_id: event.target.value })}
+                        />
+                    </FormField>
+                    <FormField
+                        label="Conversions API access token"
+                        htmlFor="ads_access_token"
+                        error={adsError('access_token')}
+                        hint={
+                            meta_ads.has_access_token
+                                ? 'A token is saved. Leave blank to keep it, or paste a new one to replace it.'
+                                : 'Generate a system user token in Events Manager. It is stored encrypted and never shown again.'
+                        }
+                    >
+                        <Input
+                            id="ads_access_token"
+                            type="password"
+                            autoComplete="off"
+                            value={form.data.ads.access_token}
+                            onChange={(event) => form.setData('ads', { ...form.data.ads, access_token: event.target.value })}
+                        />
+                    </FormField>
+                    <FormField
+                        label="Test event code"
+                        htmlFor="ads_test_event_code"
+                        error={adsError('test_event_code')}
+                        hint="Optional. Use while verifying events in Events Manager, then clear it."
+                    >
+                        <Input
+                            id="ads_test_event_code"
+                            value={form.data.ads.test_event_code}
+                            onChange={(event) => form.setData('ads', { ...form.data.ads, test_event_code: event.target.value })}
+                        />
+                    </FormField>
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={form.data.ads.advanced_matching}
+                            onChange={(event) => form.setData('ads', { ...form.data.ads, advanced_matching: event.target.checked })}
+                        />
+                        Send hashed email and phone with Purchase events
+                    </label>
                 </FormCard>
                 <div className="lg:col-span-2">
                     <Button type="submit" disabled={form.processing}>

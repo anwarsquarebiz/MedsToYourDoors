@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
         ]);
 
+        $middleware->encryptCookies(except: [
+            '_fbp',
+            '_fbc',
+        ]);
+
         /*
          | The payment gateway posts webhooks server to server and cannot carry
          | a session CSRF token.

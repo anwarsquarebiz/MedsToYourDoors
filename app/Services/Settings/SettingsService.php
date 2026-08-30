@@ -32,6 +32,11 @@ class SettingsService
         'social.facebook' => '',
         'social.instagram' => '',
         'social.twitter' => '',
+        'ads.meta.enabled' => false,
+        'ads.meta.pixel_id' => '',
+        'ads.meta.access_token' => '',
+        'ads.meta.test_event_code' => '',
+        'ads.meta.advanced_matching' => true,
         'seo.default_title' => 'Meds To Your Doors',
         'seo.default_description' => 'Trusted medication delivered to your door.',
     ];

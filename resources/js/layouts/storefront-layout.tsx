@@ -1,6 +1,7 @@
 import { FlashMessages } from '@/components/flash-messages';
 import { CartDrawer, useCartDrawer } from '@/components/storefront/cart-drawer';
 import { CurrencySwitcher } from '@/components/storefront/currency-switcher';
+import { MetaPixel } from '@/components/storefront/meta-pixel';
 import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -183,6 +184,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
             </footer>
 
             <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
+            <MetaPixel />
         </div>
     );
 }
