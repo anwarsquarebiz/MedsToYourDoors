@@ -77,7 +77,7 @@ it('includes image urls and paginates the admin listing', function () {
     ]);
 
     $this->actingAs($this->admin)
-        ->get('/admin/products')
+        ->get('/admin/products?sort=newest')
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->has('products.data', 2)
@@ -242,6 +242,74 @@ it('deletes a product', function () {
     expect(Product::query()->count())->toBe(0);
 });
 
+it('lists products in custom order by default', function () {
+    $second = Product::factory()->create(['title' => 'Second', 'position' => 2]);
+    $first = Product::factory()->create(['title' => 'First', 'position' => 1]);
+    ProductVariant::factory()->for($second)->create();
+    ProductVariant::factory()->for($first)->create();
+
+    $this->actingAs($this->admin)
+        ->get('/admin/products')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.sort', 'custom')
+            ->where('products.data.0.title', 'First')
+            ->where('products.data.1.title', 'Second')
+        );
+});
+
+it('reorders products', function () {
+    $first = Product::factory()->create(['title' => 'A', 'position' => 1]);
+    $second = Product::factory()->create(['title' => 'B', 'position' => 2]);
+    $third = Product::factory()->create(['title' => 'C', 'position' => 3]);
+    ProductVariant::factory()->for($first)->create();
+    ProductVariant::factory()->for($second)->create();
+    ProductVariant::factory()->for($third)->create();
+
+    $this->actingAs($this->admin)
+        ->put('/admin/products/order', [
+            'ids' => [$third->id, $first->id, $second->id],
+        ])
+        ->assertRedirect();
+
+    expect($third->fresh()->position)->toBe(1)
+        ->and($first->fresh()->position)->toBe(2)
+        ->and($second->fresh()->position)->toBe(3);
+});
+
+it('reassigns selected products into their existing position slots', function () {
+    $first = Product::factory()->create(['position' => 1]);
+    $second = Product::factory()->create(['position' => 2]);
+    $third = Product::factory()->create(['position' => 3]);
+    $fourth = Product::factory()->create(['position' => 4]);
+    ProductVariant::factory()->for($first)->create();
+    ProductVariant::factory()->for($second)->create();
+    ProductVariant::factory()->for($third)->create();
+    ProductVariant::factory()->for($fourth)->create();
+
+    $this->actingAs($this->admin)
+        ->put('/admin/products/order', [
+            'ids' => [$third->id, $first->id],
+        ])
+        ->assertRedirect();
+
+    expect($third->fresh()->position)->toBe(1)
+        ->and($second->fresh()->position)->toBe(2)
+        ->and($first->fresh()->position)->toBe(3)
+        ->and($fourth->fresh()->position)->toBe(4);
+});
+
+it('rejects unknown ids when reordering products', function () {
+    $product = Product::factory()->create();
+    ProductVariant::factory()->for($product)->create();
+
+    $this->actingAs($this->admin)
+        ->put('/admin/products/order', [
+            'ids' => [999_999],
+        ])
+        ->assertSessionHasErrors('ids.0');
+});
+
 it('forbids a customer from every product action', function () {
     $product = Product::factory()->create();
     ProductVariant::factory()->for($product)->create();
@@ -251,9 +319,11 @@ it('forbids a customer from every product action', function () {
     $this->actingAs($customer)->get('/admin/products/create')->assertForbidden();
     $this->actingAs($customer)->post('/admin/products', adminProductPayload())->assertForbidden();
     $this->actingAs($customer)->get("/admin/products/{$product->id}/edit")->assertForbidden();
+    $this->actingAs($customer)->put('/admin/products/order', ['ids' => [$product->id]])->assertForbidden();
     $this->actingAs($customer)->delete("/admin/products/{$product->id}")->assertForbidden();
 });
 
 it('redirects guests to login', function () {
     $this->get('/admin/products')->assertRedirect('/login');
+    $this->put('/admin/products/order', ['ids' => [1]])->assertRedirect('/login');
 });

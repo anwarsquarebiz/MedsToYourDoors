@@ -15,9 +15,15 @@ interface MetaAdsProps {
     has_access_token: boolean;
 }
 
+interface GoogleAnalyticsProps {
+    enabled: boolean;
+    measurement_id: string;
+}
+
 interface AdminSettingsProps {
     settings: Record<string, unknown>;
     meta_ads: MetaAdsProps;
+    google_analytics: GoogleAnalyticsProps;
     branding: {
         logo_url: string | null;
         favicon_url: string | null;
@@ -26,7 +32,7 @@ interface AdminSettingsProps {
 
 const str = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
-export default function AdminSettings({ settings, meta_ads, branding }: AdminSettingsProps) {
+export default function AdminSettings({ settings, meta_ads, google_analytics, branding }: AdminSettingsProps) {
     const form = useForm({
         store: {
             name: str(settings['store.name']),
@@ -54,6 +60,10 @@ export default function AdminSettings({ settings, meta_ads, branding }: AdminSet
             test_event_code: meta_ads.test_event_code,
             advanced_matching: Boolean(meta_ads.advanced_matching),
         },
+        google: {
+            enabled: Boolean(google_analytics.enabled),
+            measurement_id: google_analytics.measurement_id,
+        },
     });
 
     const submit: FormEventHandler = (event) => {
@@ -62,6 +72,7 @@ export default function AdminSettings({ settings, meta_ads, branding }: AdminSet
     };
 
     const adsError = (field: string): string | undefined => form.errors[`ads.${field}`];
+    const googleError = (field: string): string | undefined => form.errors[`google.${field}`];
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/admin' },
@@ -69,7 +80,7 @@ export default function AdminSettings({ settings, meta_ads, branding }: AdminSet
     ];
 
     return (
-        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store details, branding, checkout, SEO and Meta ads.">
+        <AdminLayout breadcrumbs={breadcrumbs} title="Settings" description="Store details, branding, checkout, SEO and analytics.">
             <form onSubmit={submit} className="grid gap-6 lg:grid-cols-2">
                 <FormCard title="Store">
                     <FormField label="Name" htmlFor="store_name">
@@ -181,6 +192,32 @@ export default function AdminSettings({ settings, meta_ads, branding }: AdminSet
                         />
                         Send hashed email and phone with Purchase events
                     </label>
+                </FormCard>
+                <FormCard
+                    title="Google Analytics"
+                    description="GA4 measurement ID. Page views and checkout events are sent from the storefront, not from admin."
+                >
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={form.data.google.enabled}
+                            onChange={(event) => form.setData('google', { ...form.data.google, enabled: event.target.checked })}
+                        />
+                        Enable Google Analytics
+                    </label>
+                    <FormField
+                        label="Measurement ID"
+                        htmlFor="google_measurement_id"
+                        error={googleError('measurement_id')}
+                        hint="From Google Analytics Admin → Data streams. Starts with G- or GT-."
+                    >
+                        <Input
+                            id="google_measurement_id"
+                            value={form.data.google.measurement_id}
+                            placeholder="G-XXXXXXXXXX"
+                            onChange={(event) => form.setData('google', { ...form.data.google, measurement_id: event.target.value })}
+                        />
+                    </FormField>
                 </FormCard>
                 <div className="lg:col-span-2">
                     <Button type="submit" disabled={form.processing}>

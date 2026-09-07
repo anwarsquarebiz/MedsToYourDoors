@@ -33,6 +33,8 @@ class UpdateStoreSettingsRequest extends FormRequest
             'ads.access_token' => ['nullable', 'string', 'max:512'],
             'ads.test_event_code' => ['nullable', 'string', 'max:64'],
             'ads.advanced_matching' => ['boolean'],
+            'google.enabled' => ['boolean'],
+            'google.measurement_id' => ['nullable', 'string', 'max:24', 'regex:/^((G|GT)-[A-Z0-9]+)?$/i'],
         ];
     }
 }

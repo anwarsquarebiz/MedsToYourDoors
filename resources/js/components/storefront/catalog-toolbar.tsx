@@ -1,18 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { catalogSortOptions, defaultCatalogSort } from '@/lib/catalog-sort';
 import { type CatalogFilters } from '@/types';
 import { router } from '@inertiajs/react';
 import { Search, X } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
-
-const sortOptions = [
-    { value: 'newest', label: 'Newest' },
-    { value: 'oldest', label: 'Oldest' },
-    { value: 'price_asc', label: 'Price: low to high' },
-    { value: 'price_desc', label: 'Price: high to low' },
-    { value: 'title_asc', label: 'Name: A to Z' },
-    { value: 'title_desc', label: 'Name: Z to A' },
-];
 
 interface CatalogToolbarProps {
     filters: CatalogFilters;
@@ -71,12 +63,12 @@ export function CatalogToolbar({ filters, baseUrl, resultCount }: CatalogToolbar
                 </label>
 
                 <select
-                    value={filters.sort ?? 'newest'}
+                    value={filters.sort ?? defaultCatalogSort}
                     onChange={(event) => apply({ sort: event.target.value })}
                     aria-label="Sort products"
                     className="rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
                 >
-                    {sortOptions.map((option) => (
+                    {catalogSortOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                             {option.label}
                         </option>

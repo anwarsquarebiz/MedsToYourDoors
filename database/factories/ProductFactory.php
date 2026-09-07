@@ -32,6 +32,7 @@ class ProductFactory extends Factory
             'seo_title' => null,
             'seo_description' => null,
             'published_at' => now()->subDay(),
+            'position' => 0,
         ];
     }
 

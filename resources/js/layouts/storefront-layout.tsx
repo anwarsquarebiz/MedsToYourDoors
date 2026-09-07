@@ -1,6 +1,7 @@
 import { FlashMessages } from '@/components/flash-messages';
 import { CartDrawer, useCartDrawer } from '@/components/storefront/cart-drawer';
 import { CurrencySwitcher } from '@/components/storefront/currency-switcher';
+import { GoogleAnalytics } from '@/components/storefront/google-analytics';
 import { MetaPixel } from '@/components/storefront/meta-pixel';
 import { StoreLogo } from '@/components/store-logo';
 import { Button } from '@/components/ui/button';
@@ -185,6 +186,7 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
 
             <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
             <MetaPixel />
+            <GoogleAnalytics />
         </div>
     );
 }

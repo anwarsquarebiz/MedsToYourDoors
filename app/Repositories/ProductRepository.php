@@ -90,7 +90,7 @@ class ProductRepository implements ProductRepositoryInterface
             $query->whereHas('collections', fn (Builder $q) => $q->whereKey($filters['collection_id']));
         }
 
-        return $this->applySort($query, $filters['sort'] ?? 'newest')
+        return $this->applySort($query, $filters['sort'] ?? 'custom')
             ->paginate($perPage ?? (int) config('shop.catalog.admin_per_page', 20))
             ->withQueryString();
     }
@@ -125,7 +125,7 @@ class ProductRepository implements ProductRepositoryInterface
             );
         }
 
-        return $this->applySort($query, $filters['sort'] ?? 'newest');
+        return $this->applySort($query, $filters['sort'] ?? 'custom');
     }
 
     /**
@@ -135,12 +135,13 @@ class ProductRepository implements ProductRepositoryInterface
     private function applySort(Builder $query, ?string $sort): Builder
     {
         return match ($sort) {
-            'price_asc' => $query->orderBy('min_price_amount'),
-            'price_desc' => $query->orderByDesc('min_price_amount'),
-            'title_asc' => $query->orderBy('title'),
-            'title_desc' => $query->orderByDesc('title'),
-            'oldest' => $query->oldest('created_at'),
-            default => $query->latest('created_at'),
+            'price_asc' => $query->orderBy('min_price_amount')->orderBy('id'),
+            'price_desc' => $query->orderByDesc('min_price_amount')->orderBy('id'),
+            'title_asc' => $query->orderBy('title')->orderBy('id'),
+            'title_desc' => $query->orderByDesc('title')->orderBy('id'),
+            'oldest' => $query->oldest('created_at')->orderBy('id'),
+            'newest' => $query->latest('created_at')->orderBy('id'),
+            default => $query->orderBy('position')->orderBy('id'),
         };
     }
 }

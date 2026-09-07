@@ -47,6 +47,11 @@ export interface MetaPixelConfig {
     pixel_id: string;
 }
 
+export interface GoogleAnalyticsConfig {
+    enabled: boolean;
+    measurement_id: string;
+}
+
 export interface CurrencyOption {
     code: string;
     name: string;
@@ -100,6 +105,7 @@ export interface SharedData {
     navigation?: StorefrontNavigation;
     cart?: CartSummary;
     meta_pixel?: MetaPixelConfig | null;
+    google_analytics?: GoogleAnalyticsConfig | null;
     quote?: { message: string; author: string };
     [key: string]: unknown;
 }

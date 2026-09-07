@@ -176,6 +176,37 @@ it('searches products by title', function () {
         );
 });
 
+it('sorts products by custom position by default', function () {
+    ProductVariant::factory()->for(Product::factory()->create(['title' => 'Later', 'position' => 2]))->create();
+    ProductVariant::factory()->for(Product::factory()->create(['title' => 'Earlier', 'position' => 1]))->create();
+
+    $this->get('/products')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.sort', 'custom')
+            ->where('products.data.0.title', 'Earlier')
+            ->where('products.data.1.title', 'Later')
+        );
+});
+
+it('sorts collection products by the custom catalog order', function () {
+    $collection = Collection::factory()->create(['slug' => 'featured']);
+
+    $second = Product::factory()->create(['title' => 'Second', 'position' => 2]);
+    $first = Product::factory()->create(['title' => 'First', 'position' => 1]);
+    ProductVariant::factory()->for($second)->create();
+    ProductVariant::factory()->for($first)->create();
+
+    $collection->products()->attach([$second->id, $first->id]);
+
+    $this->get('/collections/featured')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.data.0.title', 'First')
+            ->where('products.data.1.title', 'Second')
+        );
+});
+
 it('sorts products by price ascending', function () {
     ProductVariant::factory()->for(Product::factory()->create(['title' => 'Expensive']))->priced(5000)->create();
     ProductVariant::factory()->for(Product::factory()->create(['title' => 'Cheap']))->priced(500)->create();

@@ -5,42 +5,6 @@ use App\Services\Ads\MetaAdsSettings;
 use App\Services\Settings\SettingsService;
 use Illuminate\Support\Facades\Crypt;
 
-/**
- * @param  array<string, mixed>  $overrides
- * @return array<string, mixed>
- */
-function storeSettingsPayload(array $overrides = []): array
-{
-    return array_replace_recursive([
-        'store' => [
-            'name' => 'Meds To Your Doors',
-            'email' => 'support@medstoyourdoors.com',
-            'phone' => '',
-            'address' => '',
-        ],
-        'checkout' => [
-            'tax_rate_basis_points' => 0,
-            'guest_checkout_enabled' => true,
-        ],
-        'seo' => [
-            'default_title' => 'Meds To Your Doors',
-            'default_description' => 'Trusted medication delivered to your door.',
-        ],
-        'social' => [
-            'facebook' => '',
-            'instagram' => '',
-            'twitter' => '',
-        ],
-        'ads' => [
-            'enabled' => false,
-            'pixel_id' => '',
-            'access_token' => '',
-            'test_event_code' => '',
-            'advanced_matching' => true,
-        ],
-    ], $overrides);
-}
-
 it('redirects guests away from meta ads settings', function () {
     $this->get('/admin/settings')->assertRedirect('/login');
 });

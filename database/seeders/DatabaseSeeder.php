@@ -143,7 +143,7 @@ class DatabaseSeeder extends Seeder
             ['Omega-3', 'omega-3', 'Fish oil softgels', 1599, 40, $wellness],
         ];
 
-        foreach ($products as [$title, $slug, $description, $price, $stock, $collection]) {
+        foreach ($products as $index => [$title, $slug, $description, $price, $stock, $collection]) {
             $product = Product::query()->updateOrCreate(
                 ['slug' => $slug],
                 [
@@ -152,6 +152,7 @@ class DatabaseSeeder extends Seeder
                     'status' => ProductStatus::Active,
                     'published_at' => now()->subDay(),
                     'vendor' => 'Meds To Your Doors',
+                    'position' => $index + 1,
                 ],
             );
 

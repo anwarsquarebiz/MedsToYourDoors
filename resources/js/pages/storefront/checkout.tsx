@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { googleItem, trackGoogleEvent } from '@/lib/google-analytics';
 import { moneyValue, newMetaEventId, trackMetaEvent } from '@/lib/meta-pixel';
 import { type AddressRecord, type CartDetail, type SeoMeta, type SharedData, type ShippingQuote } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -96,6 +97,13 @@ export default function CheckoutPage({
             },
             newMetaEventId(),
         );
+        trackGoogleEvent('begin_checkout', {
+            currency: cart.data.currency,
+            value: moneyValue(value),
+            items: cart.data.items.map((line) =>
+                googleItem(String(line.variant.id), line.unit_price.decimal, line.quantity, line.product.title),
+            ),
+        });
     }, [cart.data.id, cart.data.currency, cart.data.items, cart.data.totals.item_count, cart.data.totals.total.decimal]);
 
     const format = (amount: number) =>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\InventoryPolicy;
 use App\Enums\ProductStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Product\ReorderProductsRequest;
 use App\Http\Requests\Admin\Product\StoreProductRequest;
 use App\Http\Requests\Admin\Product\UpdateProductRequest;
 use App\Http\Resources\AdminProductResource;
@@ -33,7 +34,7 @@ class ProductController extends Controller
             'search' => $request->string('search')->trim()->value() ?: null,
             'status' => $request->input('status'),
             'collection_id' => $request->integer('collection_id') ?: null,
-            'sort' => $request->input('sort', 'newest'),
+            'sort' => $request->input('sort', 'custom'),
         ];
 
         return Inertia::render('admin/products/index', [
@@ -82,6 +83,13 @@ class ProductController extends Controller
         $this->products->update($product, $request->validated());
 
         return back()->with('success', 'Product saved.');
+    }
+
+    public function reorder(ReorderProductsRequest $request): RedirectResponse
+    {
+        $this->products->reorder($request->validated('ids'));
+
+        return back();
     }
 
     public function destroy(Product $product): RedirectResponse

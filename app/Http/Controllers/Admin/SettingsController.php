@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateBrandingSettingsRequest;
 use App\Http\Requests\Admin\Settings\UpdateStoreSettingsRequest;
+use App\Services\Ads\GoogleAnalyticsSettings;
 use App\Services\Ads\MetaAdsSettings;
 use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
@@ -18,6 +19,7 @@ class SettingsController extends Controller
         private readonly SettingsService $settings,
         private readonly BrandingService $branding,
         private readonly MetaAdsSettings $metaAds,
+        private readonly GoogleAnalyticsSettings $googleAnalytics,
     ) {}
 
     public function edit(): Response
@@ -27,6 +29,7 @@ class SettingsController extends Controller
         return Inertia::render('admin/settings/edit', [
             'settings' => $this->settings->all()->except(['ads.meta.access_token']),
             'meta_ads' => $this->metaAds->adminPayload(),
+            'google_analytics' => $this->googleAnalytics->adminPayload(),
             'branding' => [
                 'logo_url' => $this->branding->logoUrl(),
                 'favicon_url' => $this->branding->faviconUrl(),
@@ -63,6 +66,10 @@ class SettingsController extends Controller
 
         if (array_key_exists('ads', $data)) {
             $this->metaAds->update($data['ads']);
+        }
+
+        if (array_key_exists('google', $data)) {
+            $this->googleAnalytics->update($data['google']);
         }
 
         return back()->with('success', 'Settings saved.');

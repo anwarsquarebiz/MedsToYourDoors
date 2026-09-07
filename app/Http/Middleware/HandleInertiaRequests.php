@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\CartItemResource;
+use App\Services\Ads\GoogleAnalyticsSettings;
 use App\Services\Ads\MetaAdsSettings;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
@@ -36,6 +37,7 @@ class HandleInertiaRequests extends Middleware
         private readonly CurrencyService $currencies,
         private readonly CurrencyConverter $converter,
         private readonly MetaAdsSettings $metaAds,
+        private readonly GoogleAnalyticsSettings $googleAnalytics,
     ) {}
 
     /**
@@ -109,6 +111,9 @@ class HandleInertiaRequests extends Middleware
             'meta_pixel' => fn (): ?array => $request->routeIs('admin.*')
                 ? null
                 : $this->metaAds->publicPixel(),
+            'google_analytics' => fn (): ?array => $request->routeIs('admin.*')
+                ? null
+                : $this->googleAnalytics->publicConfig(),
         ];
     }
 

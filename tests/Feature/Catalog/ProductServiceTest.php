@@ -40,6 +40,26 @@ it('creates a product with a generated slug', function () {
         ->and($product->status)->toBe(ProductStatus::Active);
 });
 
+it('appends new products to the end of the custom order', function () {
+    Product::factory()->create(['position' => 5]);
+
+    $product = $this->service->create(productPayload());
+
+    expect($product->position)->toBe(6);
+});
+
+it('reorders products into the requested sequence', function () {
+    $first = Product::factory()->create(['position' => 1]);
+    $second = Product::factory()->create(['position' => 2]);
+    $third = Product::factory()->create(['position' => 3]);
+
+    $this->service->reorder([$third->id, $first->id, $second->id]);
+
+    expect($third->fresh()->position)->toBe(1)
+        ->and($first->fresh()->position)->toBe(2)
+        ->and($second->fresh()->position)->toBe(3);
+});
+
 it('appends a suffix when a slug is already taken', function () {
     $this->service->create(productPayload());
     $second = $this->service->create(productPayload([

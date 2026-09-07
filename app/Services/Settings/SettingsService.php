@@ -37,6 +37,8 @@ class SettingsService
         'ads.meta.access_token' => '',
         'ads.meta.test_event_code' => '',
         'ads.meta.advanced_matching' => true,
+        'ads.google.enabled' => false,
+        'ads.google.measurement_id' => '',
         'seo.default_title' => 'Meds To Your Doors',
         'seo.default_description' => 'Trusted medication delivered to your door.',
     ];

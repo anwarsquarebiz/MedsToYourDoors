@@ -114,6 +114,46 @@ class ProductService
     }
 
     /**
+     * Apply a new catalog order. Submitted ids keep their relative slots so
+     * a paginated admin page can be rearranged without moving other products.
+     *
+     * @param  array<int, int>  $orderedIds
+     */
+    public function reorder(array $orderedIds): void
+    {
+        $ids = collect($orderedIds)
+            ->map(fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $products = Product::query()
+            ->whereKey($ids)
+            ->get(['id', 'position'])
+            ->keyBy('id');
+
+        $ids = $ids
+            ->filter(fn (int $id): bool => $products->has($id))
+            ->values();
+
+        if ($ids->count() < 2) {
+            return;
+        }
+
+        $slots = $ids
+            ->map(fn (int $id): int => (int) $products[$id]->position)
+            ->sort()
+            ->values();
+
+        DB::transaction(function () use ($ids, $slots): void {
+            foreach ($ids as $index => $id) {
+                Product::query()->whereKey($id)->update(['position' => $slots[$index]]);
+            }
+        });
+
+        $this->flushCaches();
+    }
+
+    /**
      * Build a URL-safe, unique slug, falling back to the title when none given.
      */
     public function generateSlug(string $source, ?Product $ignore = null): string
@@ -161,6 +201,10 @@ class ProductService
             $attributes['slug'] = $this->generateSlug($requestedSlug, $existing);
         } elseif ($existing === null) {
             $attributes['slug'] = $this->generateSlug($data['title']);
+        }
+
+        if ($existing === null) {
+            $attributes['position'] = $this->nextPosition();
         }
 
         return $attributes;
@@ -303,6 +347,11 @@ class ProductService
                 ->mapWithKeys(fn (int $id, int $index): array => [$id => ['position' => $index]])
                 ->all()
         );
+    }
+
+    private function nextPosition(): int
+    {
+        return ((int) Product::query()->withTrashed()->max('position')) + 1;
     }
 
     private function slugTaken(string $slug, ?Product $ignore): bool

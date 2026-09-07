@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
 
+        Route::put('products/order', [ProductController::class, 'reorder'])->name('products.reorder');
         Route::resource('products', ProductController::class)->except('show');
         Route::post('products/{product}/images', [ProductImageController::class, 'store'])->name('products.images.store');
         Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('products.images.destroy');

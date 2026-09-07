@@ -27,6 +27,14 @@ class Product extends Model
         'seo_title',
         'seo_description',
         'published_at',
+        'position',
+    ];
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'position' => 0,
     ];
 
     /**
@@ -37,6 +45,7 @@ class Product extends Model
         return [
             'status' => ProductStatus::class,
             'published_at' => 'datetime',
+            'position' => 'integer',
         ];
     }
 

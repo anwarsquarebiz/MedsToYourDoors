@@ -2,6 +2,7 @@ import InputError from '@/components/input-error';
 import { ProductDetailsContent } from '@/components/storefront/product-details-content';
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { googleItem, trackGoogleEvent } from '@/lib/google-analytics';
 import { moneyValue, newMetaEventId, trackMetaEvent } from '@/lib/meta-pixel';
 import { type Money, type ProductDetail, type ProductOption, type ProductVariant, type SeoMeta } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -266,6 +267,11 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
             },
             newMetaEventId(),
         );
+        trackGoogleEvent('view_item', {
+            currency: activeVariant.price.currency,
+            value: moneyValue(activeVariant.price.decimal),
+            items: [googleItem(String(activeVariant.id), activeVariant.price.decimal, 1, item.title)],
+        });
     }, [item.id, item.title, activeVariant]);
 
     const addToCart = () => {
@@ -289,6 +295,11 @@ export default function ProductShow({ product, seo }: ProductShowProps) {
                     },
                     newMetaEventId(),
                 );
+                trackGoogleEvent('add_to_cart', {
+                    currency: activeVariant.price.currency,
+                    value: moneyValue(activeVariant.price.decimal) * quantity,
+                    items: [googleItem(String(activeVariant.id), activeVariant.price.decimal, quantity, item.title)],
+                });
             },
         });
     };

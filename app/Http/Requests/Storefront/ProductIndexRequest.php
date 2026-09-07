@@ -22,7 +22,7 @@ class ProductIndexRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'sort' => ['nullable', 'string', 'in:newest,oldest,price_asc,price_desc,title_asc,title_desc'],
+            'sort' => ['nullable', 'string', 'in:custom,newest,oldest,price_asc,price_desc,title_asc,title_desc'],
             'in_stock' => ['nullable', 'boolean'],
             'min_price' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
             'max_price' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
@@ -38,7 +38,7 @@ class ProductIndexRequest extends FormRequest
     {
         return [
             'search' => $this->string('search')->trim()->value() ?: null,
-            'sort' => $this->input('sort', 'newest'),
+            'sort' => $this->input('sort', 'custom'),
             'in_stock' => $this->boolean('in_stock'),
             'min_price' => $this->filled('min_price') ? (string) $this->input('min_price') : null,
             'max_price' => $this->filled('max_price') ? (string) $this->input('max_price') : null,

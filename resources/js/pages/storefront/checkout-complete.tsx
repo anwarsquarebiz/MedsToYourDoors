@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { googleItem, trackGoogleEvent } from '@/lib/google-analytics';
 import { moneyValue, trackMetaEvent } from '@/lib/meta-pixel';
 import { type OrderDetail, type SeoMeta } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -16,31 +17,49 @@ export default function CheckoutComplete({ order, seo }: CheckoutCompleteProps) 
     const tracked = useRef(false);
 
     useEffect(() => {
-        if (tracked.current || !item.is_paid || !item.meta_event_id) {
+        if (tracked.current || !item.is_paid) {
             return;
         }
 
         tracked.current = true;
 
         const lines = item.items ?? [];
-
-        trackMetaEvent(
-            'Purchase',
-            {
-                content_ids: lines.map((line) => String(line.product_variant_id ?? line.product_id ?? line.id)),
-                content_type: 'product',
-                value: moneyValue(item.grand_total.decimal),
-                currency: item.currency,
-                num_items: lines.reduce((sum, line) => sum + line.quantity, 0),
-                contents: lines.map((line) => ({
-                    id: String(line.product_variant_id ?? line.product_id ?? line.id),
-                    quantity: line.quantity,
-                    item_price: moneyValue(line.unit_price.decimal),
-                })),
-                order_id: item.order_number,
-            },
-            item.meta_event_id,
+        const contentIds = lines.map((line) => String(line.product_variant_id ?? line.product_id ?? line.id));
+        const items = lines.map((line) =>
+            googleItem(
+                String(line.product_variant_id ?? line.product_id ?? line.id),
+                line.unit_price.decimal,
+                line.quantity,
+                line.product_title,
+            ),
         );
+
+        if (item.meta_event_id) {
+            trackMetaEvent(
+                'Purchase',
+                {
+                    content_ids: contentIds,
+                    content_type: 'product',
+                    value: moneyValue(item.grand_total.decimal),
+                    currency: item.currency,
+                    num_items: lines.reduce((sum, line) => sum + line.quantity, 0),
+                    contents: lines.map((line) => ({
+                        id: String(line.product_variant_id ?? line.product_id ?? line.id),
+                        quantity: line.quantity,
+                        item_price: moneyValue(line.unit_price.decimal),
+                    })),
+                    order_id: item.order_number,
+                },
+                item.meta_event_id,
+            );
+        }
+
+        trackGoogleEvent('purchase', {
+            transaction_id: item.order_number,
+            currency: item.currency,
+            value: moneyValue(item.grand_total.decimal),
+            items,
+        });
     }, [item]);
 
     return (
