@@ -242,6 +242,29 @@ it('deletes a product', function () {
     expect(Product::query()->count())->toBe(0);
 });
 
+it('lists every product when sorting by custom order', function () {
+    config(['shop.catalog.admin_per_page' => 2]);
+
+    $products = Product::factory()->count(3)->sequence(
+        ['title' => 'First', 'position' => 1],
+        ['title' => 'Second', 'position' => 2],
+        ['title' => 'Third', 'position' => 3],
+    )->create();
+
+    $products->each(fn (Product $product) => ProductVariant::factory()->for($product)->create());
+
+    $this->actingAs($this->admin)
+        ->get('/admin/products')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('filters.sort', 'custom')
+            ->has('products.data', 3)
+            ->where('products.meta.last_page', 1)
+            ->where('products.data.0.title', 'First')
+            ->where('products.data.2.title', 'Third')
+        );
+});
+
 it('lists products in custom order by default', function () {
     $second = Product::factory()->create(['title' => 'Second', 'position' => 2]);
     $first = Product::factory()->create(['title' => 'First', 'position' => 1]);

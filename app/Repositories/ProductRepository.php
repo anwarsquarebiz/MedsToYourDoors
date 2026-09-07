@@ -90,8 +90,20 @@ class ProductRepository implements ProductRepositoryInterface
             $query->whereHas('collections', fn (Builder $q) => $q->whereKey($filters['collection_id']));
         }
 
-        return $this->applySort($query, $filters['sort'] ?? 'custom')
-            ->paginate($perPage ?? (int) config('shop.catalog.admin_per_page', 20))
+        $sort = $filters['sort'] ?? 'custom';
+
+        /*
+         | Custom order is one list so a product can be dragged from the end
+         | of the catalog to the top. Other sorts keep the usual page size.
+         */
+        if ($perPage === null) {
+            $perPage = $sort === 'custom'
+                ? max((clone $query)->count(), 1)
+                : (int) config('shop.catalog.admin_per_page', 20);
+        }
+
+        return $this->applySort($query, $sort)
+            ->paginate($perPage)
             ->withQueryString();
     }
 

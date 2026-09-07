@@ -228,9 +228,11 @@ function SortableProductTable({ products, canReorder }: { products: Paginated<Ad
 
     return (
         <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
-            {canReorder && products.meta.last_page > 1 && (
+            {canReorder && (
                 <p className="text-muted-foreground border-b border-neutral-200 px-4 py-2 text-sm dark:border-neutral-800">
-                    Drag to rearrange products on this page. Other pages keep their place.
+                    {products.meta.total === 1
+                        ? 'This product is listed so you can drag it into place.'
+                        : `All ${products.meta.total} products are listed so you can drag any item to the top, the bottom, or anywhere in between.`}
                 </p>
             )}
             <div className="overflow-x-auto">
