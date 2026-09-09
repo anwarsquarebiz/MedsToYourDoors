@@ -56,17 +56,34 @@ class ProductRepository implements ProductRepositoryInterface
     }
 
     /**
+     * @param  list<string>  $slugs
      * @return EloquentCollection<int, Product>
      */
-    public function latestPublished(int $limit = 8): EloquentCollection
+    public function publishedBySlugs(array $slugs): EloquentCollection
     {
-        return Product::query()
+        if ($slugs === []) {
+            return new EloquentCollection;
+        }
+
+        $products = Product::query()
             ->published()
             ->with(self::CardRelations)
             ->withMin('variants as min_price_amount', 'price_amount')
-            ->latest('published_at')
-            ->limit($limit)
-            ->get();
+            ->whereIn('slug', $slugs)
+            ->get()
+            ->keyBy('slug');
+
+        $ordered = new EloquentCollection;
+
+        foreach ($slugs as $slug) {
+            $product = $products->get($slug);
+
+            if ($product !== null) {
+                $ordered->push($product);
+            }
+        }
+
+        return $ordered;
     }
 
     /**

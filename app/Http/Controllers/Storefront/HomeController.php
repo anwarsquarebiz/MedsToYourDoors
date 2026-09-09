@@ -27,7 +27,11 @@ class HomeController extends Controller
             'banners' => BannerResource::collection(
                 CacheKeys::remember(CacheKeys::Banners, 'home', fn () => Banner::query()->live()->get())
             ),
-            'newArrivals' => ProductSummaryResource::collection($this->products->latestPublished(8)),
+            'featuredProducts' => ProductSummaryResource::collection(
+                $this->products->publishedBySlugs(
+                    config('shop.catalog.home_featured_slugs', [])
+                )
+            ),
             'collections' => CollectionSummaryResource::collection(
                 Collection::query()
                     ->published()

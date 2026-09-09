@@ -13,19 +13,23 @@ it('renders the home page', function () {
             ->component('storefront/home')
             ->has('banners.data')
             ->has('collections.data')
-            ->has('newArrivals.data')
+            ->has('featuredProducts.data')
         );
 });
 
-it('shows published collections and latest products on the home page', function () {
+it('shows published collections and featured products on the home page', function () {
     $collection = Collection::factory()->create(['title' => 'Erectile Dysfunction', 'position' => 1]);
     Collection::factory()->draft()->create(['title' => 'Hidden collection']);
 
-    $live = Product::factory()->create(['title' => 'Cenforce 100 Mg', 'published_at' => now()->subHour()]);
-    ProductVariant::factory()->for($live)->create();
+    foreach (['cenforce-100-mg', 'cenforce-200-mg', 'vidalista-20-mg', 'vidalista-60-mg'] as $slug) {
+        ProductVariant::factory()->for(Product::factory()->create([
+            'title' => $slug,
+            'slug' => $slug,
+        ]))->create();
+    }
 
-    $draft = Product::factory()->draft()->create(['title' => 'Hidden product']);
-    ProductVariant::factory()->for($draft)->create();
+    ProductVariant::factory()->for(Product::factory()->create(['title' => 'Should not appear']))->create();
+    ProductVariant::factory()->for(Product::factory()->draft()->create(['title' => 'Hidden product']))->create();
 
     $this->get('/')
         ->assertOk()
@@ -33,8 +37,23 @@ it('shows published collections and latest products on the home page', function 
             ->component('storefront/home')
             ->has('collections.data', 1)
             ->where('collections.data.0.title', $collection->title)
-            ->has('newArrivals.data', 1)
-            ->where('newArrivals.data.0.title', 'Cenforce 100 Mg')
+            ->has('featuredProducts.data', 4)
+            ->where('featuredProducts.data.0.slug', 'cenforce-100-mg')
+            ->where('featuredProducts.data.1.slug', 'cenforce-200-mg')
+            ->where('featuredProducts.data.2.slug', 'vidalista-20-mg')
+            ->where('featuredProducts.data.3.slug', 'vidalista-60-mg')
+        );
+});
+
+it('omits unpublished featured slugs from the home page', function () {
+    ProductVariant::factory()->for(Product::factory()->create(['slug' => 'cenforce-100-mg']))->create();
+    ProductVariant::factory()->for(Product::factory()->draft()->create(['slug' => 'cenforce-200-mg']))->create();
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('featuredProducts.data', 1)
+            ->where('featuredProducts.data.0.slug', 'cenforce-100-mg')
         );
 });
 

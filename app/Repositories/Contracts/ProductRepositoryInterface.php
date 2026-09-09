@@ -46,11 +46,13 @@ interface ProductRepositoryInterface
     public function findPublishedBySlug(string $slug): ?Product;
 
     /**
-     * Newest published products, for the storefront home page.
+     * Published products in the given slug order, for merchandised surfaces
+     * such as the home page. Missing or unpublished slugs are skipped.
      *
+     * @param  list<string>  $slugs
      * @return EloquentCollection<int, Product>
      */
-    public function latestPublished(int $limit = 8): EloquentCollection;
+    public function publishedBySlugs(array $slugs): EloquentCollection;
 
     /**
      * Admin listing, which includes drafts and archived products.

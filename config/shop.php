@@ -24,7 +24,7 @@ return [
         'session_key' => 'display_currency',
         'cookie' => 'currency',
         'cookie_minutes' => 525600,
-        'free_shipping_threshold_amount' => 5000,
+        'free_shipping_threshold_amount' => 10000,
         'fetch_rates' => env('SHOP_FETCH_EXCHANGE_RATES', true),
         'detect_from_ip' => env('SHOP_DETECT_CURRENCY_FROM_IP', true),
         'rates_url' => env('SHOP_EXCHANGE_RATES_URL', 'https://open.er-api.com/v6/latest/USD'),
@@ -188,6 +188,12 @@ return [
         'admin_per_page' => 20,
         'max_options_per_product' => 3,
         'image_disk' => env('SHOP_IMAGE_DISK', 'public'),
+        'home_featured_slugs' => [
+            'cenforce-100-mg',
+            'cenforce-200-mg',
+            'vidalista-20-mg',
+            'vidalista-60-mg',
+        ],
     ],
 
     /*

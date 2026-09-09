@@ -98,15 +98,15 @@ const advantages = [
 
 interface HomeProps {
     banners: { data: HomeBanner[] };
-    newArrivals: { data: ProductSummary[] };
+    featuredProducts: { data: ProductSummary[] };
     collections: { data: CollectionSummary[] };
     seo: SeoMeta;
 }
 
-export default function Home({ banners, newArrivals, collections, seo }: HomeProps) {
+export default function Home({ banners, featuredProducts, collections, seo }: HomeProps) {
     const { store } = usePage<SharedData>().props;
     const slides = banners.data.filter((banner) => Boolean(banner.image_url));
-    const featuredProducts = newArrivals.data.slice(0, 4);
+    const products = featuredProducts.data;
 
     return (
         <StorefrontLayout>
@@ -285,7 +285,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                 </div>
             </section>
 
-            {featuredProducts.length > 0 && (
+            {products.length > 0 && (
                 <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-16 sm:px-6">
                     <div className="flex items-baseline justify-between gap-4">
                         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -296,7 +296,7 @@ export default function Home({ banners, newArrivals, collections, seo }: HomePro
                         </Link>
                     </div>
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                        {featuredProducts.map((product) => (
+                        {products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
