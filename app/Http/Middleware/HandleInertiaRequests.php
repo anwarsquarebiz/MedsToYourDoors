@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Resources\CartItemResource;
 use App\Services\Ads\GoogleAnalyticsSettings;
+use App\Services\Ads\GoogleTagManagerSettings;
 use App\Services\Ads\MetaAdsSettings;
 use App\Services\Cart\CartResolver;
 use App\Services\Cart\CartService;
@@ -38,6 +39,7 @@ class HandleInertiaRequests extends Middleware
         private readonly CurrencyConverter $converter,
         private readonly MetaAdsSettings $metaAds,
         private readonly GoogleAnalyticsSettings $googleAnalytics,
+        private readonly GoogleTagManagerSettings $googleTagManager,
     ) {}
 
     /**
@@ -114,6 +116,9 @@ class HandleInertiaRequests extends Middleware
             'google_analytics' => fn (): ?array => $request->routeIs('admin.*')
                 ? null
                 : $this->googleAnalytics->publicConfig(),
+            'google_tag_manager' => fn (): ?array => $request->routeIs('admin.*')
+                ? null
+                : $this->googleTagManager->publicConfig(),
         ];
     }
 

@@ -35,6 +35,8 @@ class UpdateStoreSettingsRequest extends FormRequest
             'ads.advanced_matching' => ['boolean'],
             'google.enabled' => ['boolean'],
             'google.measurement_id' => ['nullable', 'string', 'max:24', 'regex:/^((G|GT)-[A-Z0-9]+)?$/i'],
+            'gtm.enabled' => ['boolean'],
+            'gtm.container_id' => ['nullable', 'string', 'max:24', 'regex:/^(GTM-[A-Z0-9]+)?$/i'],
         ];
     }
 }

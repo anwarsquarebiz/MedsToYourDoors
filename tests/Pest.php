@@ -133,5 +133,9 @@ function storeSettingsPayload(array $overrides = []): array
             'enabled' => false,
             'measurement_id' => '',
         ],
+        'gtm' => [
+            'enabled' => false,
+            'container_id' => '',
+        ],
     ], $overrides);
 }

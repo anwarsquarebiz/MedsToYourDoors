@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateBrandingSettingsRequest;
 use App\Http\Requests\Admin\Settings\UpdateStoreSettingsRequest;
 use App\Services\Ads\GoogleAnalyticsSettings;
+use App\Services\Ads\GoogleTagManagerSettings;
 use App\Services\Ads\MetaAdsSettings;
 use App\Services\Settings\BrandingService;
 use App\Services\Settings\SettingsService;
@@ -20,6 +21,7 @@ class SettingsController extends Controller
         private readonly BrandingService $branding,
         private readonly MetaAdsSettings $metaAds,
         private readonly GoogleAnalyticsSettings $googleAnalytics,
+        private readonly GoogleTagManagerSettings $googleTagManager,
     ) {}
 
     public function edit(): Response
@@ -30,6 +32,7 @@ class SettingsController extends Controller
             'settings' => $this->settings->all()->except(['ads.meta.access_token']),
             'meta_ads' => $this->metaAds->adminPayload(),
             'google_analytics' => $this->googleAnalytics->adminPayload(),
+            'google_tag_manager' => $this->googleTagManager->adminPayload(),
             'branding' => [
                 'logo_url' => $this->branding->logoUrl(),
                 'favicon_url' => $this->branding->faviconUrl(),
@@ -70,6 +73,10 @@ class SettingsController extends Controller
 
         if (array_key_exists('google', $data)) {
             $this->googleAnalytics->update($data['google']);
+        }
+
+        if (array_key_exists('gtm', $data)) {
+            $this->googleTagManager->update($data['gtm']);
         }
 
         return back()->with('success', 'Settings saved.');

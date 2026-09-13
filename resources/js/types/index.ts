@@ -52,6 +52,11 @@ export interface GoogleAnalyticsConfig {
     measurement_id: string;
 }
 
+export interface GoogleTagManagerConfig {
+    enabled: boolean;
+    container_id: string;
+}
+
 export interface CurrencyOption {
     code: string;
     name: string;
@@ -106,6 +111,7 @@ export interface SharedData {
     cart?: CartSummary;
     meta_pixel?: MetaPixelConfig | null;
     google_analytics?: GoogleAnalyticsConfig | null;
+    google_tag_manager?: GoogleTagManagerConfig | null;
     quote?: { message: string; author: string };
     [key: string]: unknown;
 }

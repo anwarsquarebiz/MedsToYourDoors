@@ -27,7 +27,14 @@ declare global {
 }
 
 export function trackGoogleEvent(event: GoogleAnalyticsEventName, params?: GoogleAnalyticsParams): void {
-    if (typeof window === 'undefined' || typeof window.gtag !== 'function') {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    window.dataLayer = window.dataLayer ?? [];
+    window.dataLayer.push(params === undefined ? { event } : { event, ...params });
+
+    if (typeof window.gtag !== 'function') {
         return;
     }
 

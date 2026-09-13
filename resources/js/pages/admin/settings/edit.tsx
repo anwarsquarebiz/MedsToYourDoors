@@ -20,10 +20,16 @@ interface GoogleAnalyticsProps {
     measurement_id: string;
 }
 
+interface GoogleTagManagerProps {
+    enabled: boolean;
+    container_id: string;
+}
+
 interface AdminSettingsProps {
     settings: Record<string, unknown>;
     meta_ads: MetaAdsProps;
     google_analytics: GoogleAnalyticsProps;
+    google_tag_manager: GoogleTagManagerProps;
     branding: {
         logo_url: string | null;
         favicon_url: string | null;
@@ -32,7 +38,7 @@ interface AdminSettingsProps {
 
 const str = (value: unknown): string => (value === null || value === undefined ? '' : String(value));
 
-export default function AdminSettings({ settings, meta_ads, google_analytics, branding }: AdminSettingsProps) {
+export default function AdminSettings({ settings, meta_ads, google_analytics, google_tag_manager, branding }: AdminSettingsProps) {
     const form = useForm({
         store: {
             name: str(settings['store.name']),
@@ -64,6 +70,10 @@ export default function AdminSettings({ settings, meta_ads, google_analytics, br
             enabled: Boolean(google_analytics.enabled),
             measurement_id: google_analytics.measurement_id,
         },
+        gtm: {
+            enabled: Boolean(google_tag_manager.enabled),
+            container_id: google_tag_manager.container_id,
+        },
     });
 
     const submit: FormEventHandler = (event) => {
@@ -73,6 +83,7 @@ export default function AdminSettings({ settings, meta_ads, google_analytics, br
 
     const adsError = (field: string): string | undefined => form.errors[`ads.${field}`];
     const googleError = (field: string): string | undefined => form.errors[`google.${field}`];
+    const gtmError = (field: string): string | undefined => form.errors[`gtm.${field}`];
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/admin' },
@@ -194,8 +205,34 @@ export default function AdminSettings({ settings, meta_ads, google_analytics, br
                     </label>
                 </FormCard>
                 <FormCard
+                    title="Google Tag Manager"
+                    description="Paste the GTM- container ID. The storefront injects the head script and body noscript for you. If this container already loads Google Analytics, leave the Google Analytics card off to avoid double counting."
+                >
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={form.data.gtm.enabled}
+                            onChange={(event) => form.setData('gtm', { ...form.data.gtm, enabled: event.target.checked })}
+                        />
+                        Enable Google Tag Manager
+                    </label>
+                    <FormField
+                        label="Container ID"
+                        htmlFor="gtm_container_id"
+                        error={gtmError('container_id')}
+                        hint="From Tag Manager. Starts with GTM-."
+                    >
+                        <Input
+                            id="gtm_container_id"
+                            value={form.data.gtm.container_id}
+                            placeholder="GTM-XXXXXXX"
+                            onChange={(event) => form.setData('gtm', { ...form.data.gtm, container_id: event.target.value })}
+                        />
+                    </FormField>
+                </FormCard>
+                <FormCard
                     title="Google Analytics"
-                    description="GA4 measurement ID. Page views and checkout events are sent from the storefront, not from admin."
+                    description="Direct GA4 measurement ID. Use this only if you are not already firing GA4 from Tag Manager."
                 >
                     <label className="flex items-center gap-2 text-sm">
                         <input
