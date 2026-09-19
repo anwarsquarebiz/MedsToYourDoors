@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 const GTAG_SCRIPT_ID = 'google-analytics-gtag';
 
 function loadGtag(measurementId: string): void {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || document.getElementById(GTAG_SCRIPT_ID)) {
         return;
     }
 
@@ -18,13 +18,11 @@ function loadGtag(measurementId: string): void {
         };
     }
 
-    if (!document.getElementById(GTAG_SCRIPT_ID)) {
-        const script = document.createElement('script');
-        script.id = GTAG_SCRIPT_ID;
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
-        document.head.appendChild(script);
-    }
+    const script = document.createElement('script');
+    script.id = GTAG_SCRIPT_ID;
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+    document.head.appendChild(script);
 
     window.gtag('js', new Date());
     window.gtag('config', measurementId, { send_page_view: false });
@@ -39,7 +37,7 @@ function pageViewParams(): { page_title: string; page_location: string; page_pat
 }
 
 /**
- * Loads gtag.js once on the storefront and fires page_view on every Inertia visit.
+ * Fires SPA page_view events. gtag.js itself lives in the document head.
  */
 export function GoogleAnalytics() {
     const { google_analytics } = usePage<SharedData>().props;
@@ -50,9 +48,21 @@ export function GoogleAnalytics() {
             return;
         }
 
-        loadGtag(measurementId);
+        const alreadyLoaded = Boolean(document.getElementById(GTAG_SCRIPT_ID));
+
+        if (!alreadyLoaded) {
+            loadGtag(measurementId);
+        }
+
+        let skipFirst = alreadyLoaded;
 
         return router.on('navigate', () => {
+            if (skipFirst) {
+                skipFirst = false;
+
+                return;
+            }
+
             trackGoogleEvent('page_view', pageViewParams());
         });
     }, [measurementId]);

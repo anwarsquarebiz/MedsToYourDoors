@@ -112,6 +112,9 @@ it('shares the pixel id with the storefront and not with admin pages', function 
 
     $this->get('/')
         ->assertOk()
+        ->assertSee('id="meta-pixel-sdk"', false)
+        ->assertSee('https://connect.facebook.net/en_US/fbevents.js', false)
+        ->assertSee('123456789012345', false)
         ->assertInertia(fn ($page) => $page
             ->where('meta_pixel.pixel_id', '123456789012345')
             ->where('meta_pixel.enabled', true)
@@ -120,5 +123,7 @@ it('shares the pixel id with the storefront and not with admin pages', function 
     $this->actingAs(User::factory()->admin()->create())
         ->get('/admin')
         ->assertOk()
+        ->assertDontSee('meta-pixel-sdk', false)
+        ->assertDontSee('fbevents.js', false)
         ->assertInertia(fn ($page) => $page->where('meta_pixel', null));
 });

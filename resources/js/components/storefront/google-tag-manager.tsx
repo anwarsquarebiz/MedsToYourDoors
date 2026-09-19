@@ -13,16 +13,11 @@ function pageViewParams(): { page_title: string; page_location: string; page_pat
 }
 
 function loadGtm(containerId: string): void {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || document.getElementById(GTM_SCRIPT_ID)) {
         return;
     }
 
     window.dataLayer = window.dataLayer ?? [];
-
-    if (document.getElementById(GTM_SCRIPT_ID)) {
-        return;
-    }
-
     window.dataLayer.push({
         'gtm.start': Date.now(),
         event: 'gtm.js',
@@ -36,7 +31,7 @@ function loadGtm(containerId: string): void {
 }
 
 /**
- * Loads the GTM container on the storefront (script + noscript iframe).
+ * Fires SPA page_view events. The container snippet itself lives in the document head.
  */
 export function GoogleTagManager() {
     const { google_tag_manager } = usePage<SharedData>().props;
@@ -47,9 +42,21 @@ export function GoogleTagManager() {
             return;
         }
 
-        loadGtm(containerId);
+        const alreadyLoaded = Boolean(document.getElementById(GTM_SCRIPT_ID));
+
+        if (!alreadyLoaded) {
+            loadGtm(containerId);
+        }
+
+        let skipFirst = alreadyLoaded;
 
         return router.on('navigate', () => {
+            if (skipFirst) {
+                skipFirst = false;
+
+                return;
+            }
+
             window.dataLayer = window.dataLayer ?? [];
             window.dataLayer.push({
                 event: 'page_view',
@@ -58,20 +65,5 @@ export function GoogleTagManager() {
         });
     }, [containerId]);
 
-    if (!containerId) {
-        return null;
-    }
-
-    return (
-        <noscript>
-            <iframe
-                title="Google Tag Manager"
-                src={`https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(containerId)}`}
-                height={0}
-                width={0}
-                style={{ display: 'none', visibility: 'hidden' }}
-            />
-        </noscript>
-    );
+    return null;
 }
-

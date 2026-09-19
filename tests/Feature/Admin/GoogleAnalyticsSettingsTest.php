@@ -29,6 +29,8 @@ it('shares the measurement id with the storefront and not with admin pages', fun
 
     $this->get('/')
         ->assertOk()
+        ->assertSee('id="google-analytics-gtag"', false)
+        ->assertSee('https://www.googletagmanager.com/gtag/js?id=G-ABC123XYZ0', false)
         ->assertInertia(fn ($page) => $page
             ->where('google_analytics.measurement_id', 'G-ABC123XYZ0')
             ->where('google_analytics.enabled', true)
@@ -37,6 +39,8 @@ it('shares the measurement id with the storefront and not with admin pages', fun
     $this->actingAs(User::factory()->admin()->create())
         ->get('/admin')
         ->assertOk()
+        ->assertDontSee('google-analytics-gtag', false)
+        ->assertDontSee('gtag/js?id=', false)
         ->assertInertia(fn ($page) => $page->where('google_analytics', null));
 });
 

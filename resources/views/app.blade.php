@@ -6,6 +6,8 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        <x-storefront.tracking-head />
+
         @php($faviconUrl = app(\App\Services\Settings\BrandingService::class)->faviconUrl())
         @if ($faviconUrl)
             <link rel="icon" href="{{ $faviconUrl }}">
@@ -20,6 +22,7 @@
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
+        <x-storefront.tracking-body />
         @inertia
     </body>
 </html>

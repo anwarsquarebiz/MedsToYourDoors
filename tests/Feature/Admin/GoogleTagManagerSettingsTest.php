@@ -29,6 +29,10 @@ it('shares the container id with the storefront and not with admin pages', funct
 
     $this->get('/')
         ->assertOk()
+        ->assertSee('id="google-tag-manager"', false)
+        ->assertSee('https://www.googletagmanager.com/gtm.js?id=', false)
+        ->assertSee('GTM-ABCDEF1', false)
+        ->assertSee('https://www.googletagmanager.com/ns.html?id=GTM-ABCDEF1', false)
         ->assertInertia(fn ($page) => $page
             ->where('google_tag_manager.container_id', 'GTM-ABCDEF1')
             ->where('google_tag_manager.enabled', true)
@@ -37,6 +41,8 @@ it('shares the container id with the storefront and not with admin pages', funct
     $this->actingAs(User::factory()->admin()->create())
         ->get('/admin')
         ->assertOk()
+        ->assertDontSee('google-tag-manager', false)
+        ->assertDontSee('googletagmanager.com/gtm.js', false)
         ->assertInertia(fn ($page) => $page->where('google_tag_manager', null));
 });
 
