@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Exceptions\InvalidOrderTransitionException;
 use App\Exceptions\RefundException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Order\BulkDestroyOrdersRequest;
 use App\Http\Requests\Admin\Order\StoreRefundRequest;
 use App\Http\Requests\Admin\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
@@ -85,5 +86,24 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Refund issued.');
+    }
+
+    public function destroy(Order $order): RedirectResponse
+    {
+        $this->authorize('delete', $order);
+
+        $orderNumber = $order->order_number;
+
+        $this->orderService->delete($order);
+
+        return to_route('admin.orders.index')
+            ->with('success', "Order {$orderNumber} was deleted.");
+    }
+
+    public function bulkDestroy(BulkDestroyOrdersRequest $request): RedirectResponse
+    {
+        $deletedCount = $this->orderService->deleteMany($request->validated('ids'));
+
+        return back()->with('success', trans_choice('{1} :count order was deleted.|[2,*] :count orders were deleted.', $deletedCount));
     }
 }

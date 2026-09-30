@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin-layout';
 import { type BreadcrumbItem, type OrderDetail } from '@/types';
-import { Link, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
 import { type FormEventHandler } from 'react';
 
 interface AdminOrderShowProps {
@@ -36,8 +37,24 @@ export default function AdminOrderShow({ order }: AdminOrderShowProps) {
         refundForm.post(`/admin/orders/${item.id}/refunds`);
     };
 
+    const destroy = () => {
+        if (window.confirm(`Delete order ${item.order_number}? This cannot be undone.`)) {
+            router.delete(`/admin/orders/${item.id}`);
+        }
+    };
+
     return (
-        <AdminLayout breadcrumbs={breadcrumbs} title={item.order_number} description={item.email}>
+        <AdminLayout
+            breadcrumbs={breadcrumbs}
+            title={item.order_number}
+            description={item.email}
+            actions={
+                <Button variant="outline" onClick={destroy}>
+                    <Trash2 className="mr-1 size-4" />
+                    Delete
+                </Button>
+            }
+        >
             <div className="grid gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <section className="rounded-xl border border-neutral-200 p-6 dark:border-neutral-800">

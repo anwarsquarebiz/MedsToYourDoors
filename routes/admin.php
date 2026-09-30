@@ -42,7 +42,9 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::resource('coupons', CouponController::class)->except('show');
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::delete('orders', [OrderController::class, 'bulkDestroy'])->name('orders.bulk-destroy');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::post('orders/{order}/refunds', [OrderController::class, 'refund'])->name('orders.refunds.store');
 

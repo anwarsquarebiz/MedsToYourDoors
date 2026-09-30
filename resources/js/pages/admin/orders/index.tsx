@@ -1,10 +1,12 @@
 import { StatusBadge } from '@/components/admin/status-badge';
 import { Pagination } from '@/components/pagination';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin-layout';
 import { type BreadcrumbItem, type OrderDetail, type Paginated, type SelectOption } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 import { type FormEventHandler, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,6 +22,13 @@ interface AdminOrdersIndexProps {
 
 export default function AdminOrdersIndex({ orders, filters, statuses }: AdminOrdersIndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const visibleIds = orders.data.map((order) => order.id);
+    const selectedVisibleIds = selectedIds.filter((id) => visibleIds.includes(id));
+    const allVisibleSelected = visibleIds.length > 0 && selectedVisibleIds.length === visibleIds.length;
+    const someVisibleSelected = selectedVisibleIds.length > 0 && !allVisibleSelected;
 
     const apply = (overrides: Record<string, unknown>) => {
         const next = { ...filters, search, ...overrides };
@@ -34,9 +43,33 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: AdminOrd
         apply({});
     };
 
+    const toggleAll = (checked: boolean) => {
+        setSelectedIds(checked ? visibleIds : []);
+    };
+
+    const toggleOne = (orderId: number, checked: boolean) => {
+        setSelectedIds((current) => (checked ? [...current, orderId] : current.filter((id) => id !== orderId)));
+    };
+
+    const destroySelected = () => {
+        const count = selectedVisibleIds.length;
+
+        if (!window.confirm(`Delete ${count} ${count === 1 ? 'order' : 'orders'}? This cannot be undone.`)) {
+            return;
+        }
+
+        router.delete('/admin/orders', {
+            data: { ids: selectedVisibleIds },
+            preserveScroll: true,
+            onStart: () => setIsDeleting(true),
+            onSuccess: () => setSelectedIds([]),
+            onFinish: () => setIsDeleting(false),
+        });
+    };
+
     return (
         <AdminLayout breadcrumbs={breadcrumbs} title="Orders" description="Manage customer orders and fulfilment.">
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <form onSubmit={submit} className="relative w-full sm:max-w-xs">
                     <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-neutral-400" />
                     <Input className="pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search number or email" />
@@ -54,12 +87,29 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: AdminOrd
                         </option>
                     ))}
                 </select>
+                {selectedVisibleIds.length > 0 && (
+                    <div className="flex items-center gap-3 sm:ml-auto">
+                        <span className="text-muted-foreground text-sm">{selectedVisibleIds.length} selected</span>
+                        <Button variant="outline" onClick={destroySelected} disabled={isDeleting}>
+                            <Trash2 className="mr-1 size-4" />
+                            Delete selected
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800">
                 <table className="w-full text-sm">
                     <thead className="bg-neutral-50 text-left dark:bg-neutral-900">
                         <tr>
+                            <th className="w-10 px-4 py-3">
+                                <Checkbox
+                                    checked={allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' : false}
+                                    onCheckedChange={(checked) => toggleAll(checked === true)}
+                                    disabled={visibleIds.length === 0}
+                                    aria-label="Select all orders on this page"
+                                />
+                            </th>
                             <th className="px-4 py-3 font-medium">Order</th>
                             <th className="px-4 py-3 font-medium">Customer</th>
                             <th className="px-4 py-3 font-medium">Status</th>
@@ -69,6 +119,13 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: AdminOrd
                     <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
                         {orders.data.map((order) => (
                             <tr key={order.id}>
+                                <td className="px-4 py-3">
+                                    <Checkbox
+                                        checked={selectedVisibleIds.includes(order.id)}
+                                        onCheckedChange={(checked) => toggleOne(order.id, checked === true)}
+                                        aria-label={`Select order ${order.order_number}`}
+                                    />
+                                </td>
                                 <td className="px-4 py-3">
                                     <Link href={`/admin/orders/${order.id}`} className="font-medium hover:underline">
                                         {order.order_number}

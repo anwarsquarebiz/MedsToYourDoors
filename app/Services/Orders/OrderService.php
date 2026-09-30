@@ -44,6 +44,23 @@ class OrderService
         return $order->refresh();
     }
 
+    /**
+     * Items, payments, refunds, status events and coupon redemptions are
+     * removed by their cascading foreign keys.
+     */
+    public function delete(Order $order): void
+    {
+        $order->delete();
+    }
+
+    /**
+     * @param  array<int, int>  $orderIds
+     */
+    public function deleteMany(array $orderIds): int
+    {
+        return DB::transaction(fn (): int => Order::query()->whereKey($orderIds)->delete());
+    }
+
     public function updateStaffNote(Order $order, ?string $note): Order
     {
         $order->forceFill(['staff_note' => $note])->save();

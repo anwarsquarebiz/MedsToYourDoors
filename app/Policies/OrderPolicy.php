@@ -26,4 +26,14 @@ class OrderPolicy
     {
         return $user->isAdmin();
     }
+
+    public function delete(User $user, Order $order): bool
+    {
+        return $user->isAdmin();
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return $user->isAdmin();
+    }
 }
